@@ -7,13 +7,13 @@ public class BarberShop
 {
     [Key]
     public int Id { get; set; }
-    [Required]
+    [Required, StringLength(30)]
     public string Name { get; set; } = null!;
-    [Required]
+    [Required, StringLength(100)]
     public string Address { get; set; } = null!;
-    [Required]
+    [Required, StringLength(12)]
     public string PhoneNumber { get; set; } = null!;
-    [Required]
+    [Required, StringLength(30)]
     public string Email { get; set; } = null!;
     
     // List of barbers working at the barber shop

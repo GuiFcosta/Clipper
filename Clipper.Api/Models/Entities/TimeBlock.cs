@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Antiforgery;
 
 namespace Clipper.Api.Models.Entities;
 
@@ -17,6 +16,6 @@ public class TimeBlock
     public DateTime StartDateTime { get; set; }
     [Required]
     public DateTime EndDateTime { get; set; }
-    [Required]
+    [Required, StringLength(200)]
     public string Reason { get; set; } = null!;
 }

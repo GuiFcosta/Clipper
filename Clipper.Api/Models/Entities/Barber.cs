@@ -7,15 +7,15 @@ public class Barber
 {
     [Key]
     public int Id { get; set; }
-    [Required]
+    [Required, StringLength(50)]
     public string Name { get; set; } = null!;
-    [Required]
+    [Required, StringLength(12)]
     public string PhoneNumber { get; set; } = null!;
-    [Required]
+    [Required, StringLength(50)]
     public string Email { get; set; } = null!;
-    [Required]
+    [Required, StringLength(9)]
     public string Nif { get; set; } = null!;
-    [Required]
+    [Required, StringLength(100)]
     public string Address { get; set; } = null!;
     
     // Not required, as a barber might not be assigned to a barber shop yet
@@ -23,7 +23,7 @@ public class Barber
     public BarberShop? BarberShop { get; set; }
     
     // Barber's schedule
-    public BarberSchedule? BarberSchedule { get; set; }
+    public ICollection<BarberSchedule>? BarberSchedule { get; set; } = new  List<BarberSchedule>();
     
     // List of time blocks for the barber
     public ICollection<TimeBlock>? TimeBlocks { get; set; } = new List<TimeBlock>();

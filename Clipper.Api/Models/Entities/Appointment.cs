@@ -38,5 +38,6 @@ public class Appointment
     [Required]
     public AppointmentStatus Status { get; set; }
     
+    [StringLength(500)]
     public string? Notes { get; set; }
 }

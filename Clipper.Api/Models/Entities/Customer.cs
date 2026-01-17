@@ -6,11 +6,11 @@ public class Customer
 {
     [Key]
     public int Id { get; set; }
-    [Required]
+    [Required, StringLength(50)]
     public string Name { get; set; } = null!;
-    [Required]
+    [Required, StringLength(12)]
     public string PhoneNumber { get; set; } = null!;
-    [Required]
+    [Required, StringLength(50)]
     public string Email { get; set; } = null!;
     
     // List of appointments for the customer
