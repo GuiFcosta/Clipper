@@ -12,4 +12,7 @@ public class Customer
     public string PhoneNumber { get; set; } = null!;
     [Required]
     public string Email { get; set; } = null!;
+    
+    // List of appointments for the customer
+    public ICollection<Appointment>? Appointments { get; set; } = new List<Appointment>();
 }
