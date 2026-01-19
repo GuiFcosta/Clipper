@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Clipper.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a317827ed148d564404c6a76f177982b133fa5e2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1698176cd43ff0d55b8c9087e463e97b971fbba6")]
 [assembly: System.Reflection.AssemblyProductAttribute("Clipper.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Clipper.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

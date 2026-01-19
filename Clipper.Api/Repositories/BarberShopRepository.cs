@@ -1,32 +1,48 @@
+using Clipper.Api.Data;
 using Clipper.Api.Interfaces;
 using Clipper.Api.Models.Dto;
+using Clipper.Api.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Clipper.Api.Repositories;
 
-public class BarberShopRepository : IBarberShop
+public class BarberShopRepository(ApplicationDbContext context) : IBarberShop
 {
-    public Task<IEnumerable<BarberShopDto>> GetAllBarberShopsAsync()
+    public async Task<IEnumerable<BarberShop>> GetAllBarberShopsAsync()
     {
-        throw new NotImplementedException();
+        return await context.BarberShops
+            .Include(bs => bs.Barbers)
+            .ToListAsync();
+        
     }
 
-    public Task<BarberShopDto?> GetBarberShopByIdAsync(int id)
+    public async Task<BarberShop?> GetBarberShopByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await context.BarberShops
+            .Include(bs => bs.Barbers)
+            .FirstOrDefaultAsync(bs => bs.Id == id);
+        
     }
     
-    public Task<BarberShopDto?> CreateBarberShop(BarberShopDto barberShopDto)
+    public Task CreateBarberShop(BarberShop barberShop)
     {
-        throw new NotImplementedException();
+        context.BarberShops.Add(barberShop);
+        return context.SaveChangesAsync();
     }
     
-    public Task<BarberShopDto?> UpdateBarberShop(int id, BarberShopDto barberShopDto)
+    public async Task UpdateBarberShop(BarberShop barberShop)
     {
-        throw new NotImplementedException();
+        context.BarberShops.Update(barberShop);
+        await context.SaveChangesAsync();
     }
     
-    public Task<bool> DeleteBarberShop(int id)
+    public async Task DeleteBarberShop(int id)
     {
-        throw new NotImplementedException();
+        var barberShop = await context.BarberShops.FindAsync(id);
+        if (barberShop == null)
+            return;
+        
+        context.BarberShops.Remove(barberShop);
+        await context.SaveChangesAsync();
     }
 }

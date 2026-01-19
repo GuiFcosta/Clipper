@@ -1,0 +1,103 @@
+# .gitignore para projeto .NET + Rider + Windows
+# Garante que artefatos de build, caches de IDE e arquivos sensíveis não sejam comitados
+
+########################################
+# Build / Runtime
+########################################
+# Build output
+**/bin/
+**/obj/
+
+# Publish output
+**/publish/
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Rider / JetBrains
+.idea/
+*.sln.DotSettings.user
+*.DotSettings.user
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/dictionaries
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+
+# OS generated files
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Dotnet tool cache
+.dotnet/tools/
+
+# Logs
+logs/
+*.log
+
+# Database files
+*.mdf
+*.ldf
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Entity Framework
+# (Migrations code should remain; ignore only local DB files)
+
+# Secret / environment / local config
+secrets.json
+appsettings.Development.json
+.env
+.env.local
+
+# Test results
+TestResults/
+*.trx
+
+# Resharper
+_ReSharper*/
+*.ReSharper*/
+
+# Coverage results
+coverage.opencover.xml
+coverage/**
+*.coverage
+*.coveragexml
+
+# JetBrains Rider caches
+.idea/
+*.iml
+
+# Misc
+*.log
+*.cache
+*.class
+
+# Ignore published binaries and tools output that sometimes leak into repo root
+*.dll
+*.exe
+*.pdb
+
+# If you use Docker
+docker-compose.override.yml
+
+# Keep this at the end with a note
+# Observação: arquivos já versionados não serão removidos automaticamente pelo .gitignore.
+# Para aplicar este .gitignore a arquivos já comitados, execute:
+#   git rm -r --cached .; git add .; git commit -m "Apply .gitignore"
+# (Execute os comandos no diretório do repositório.)

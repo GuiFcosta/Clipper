@@ -1,21 +1,30 @@
+using Clipper.Api.Data;
 using Clipper.Api.Interfaces;
 using Clipper.Api.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Clipper.Api.Repositories;
 
-public class AvailabilityServiceRepository : IAvailabilityService
+public class AvailabilityServiceRepository(ApplicationDbContext context) : IAvailabilityService
 {
-    public Task<BarberSchedule?> GetBarberScheduleAsync(int barberId, DayOfWeek dayOfWeek)
+    public async Task<BarberSchedule?> GetBarberScheduleAsync(int barberId, DayOfWeek dayOfWeek)
     {
-        throw new NotImplementedException();
+        return await context.BarberSchedules
+            .FirstOrDefaultAsync(bs => bs.BarberId == barberId && bs.DayOfWeek == dayOfWeek);
     }
-    public Task<IEnumerable<Appointment>> GetBarberAppointmentsAsync(int barberId, DateOnly date)
+    public async Task<IEnumerable<Appointment>> GetBarberAppointmentsAsync(int barberId, DateOnly date)
     {
-        throw new NotImplementedException();
+        return await context.Appointments
+            .Where(a => a.BarberId == barberId && a.StartTime == date.ToDateTime(new TimeOnly()))
+            .ToListAsync();
     }
 
-    public Task<IEnumerable<TimeBlock>> GetBarberTimeBlocksAsync(int barberId, DateOnly date)
+    public async Task<IEnumerable<TimeBlock>> GetBarberTimeBlocksAsync(int barberId, DateOnly date)
     {
-        throw new NotImplementedException();
+        return await context.TimeBlocks
+            .Where(a => a.BarberId == barberId 
+                        && a.StartDateTime <= date.ToDateTime(new TimeOnly()) 
+                        && a.EndDateTime >= date.ToDateTime(new TimeOnly()))
+            .ToListAsync();
     }
 }
