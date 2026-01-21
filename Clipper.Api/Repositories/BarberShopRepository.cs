@@ -8,7 +8,7 @@ namespace Clipper.Api.Repositories;
 
 public class BarberShopRepository(ApplicationDbContext context) : IBarberShop
 {
-    public async Task<IEnumerable<BarberShop>> GetAllBarberShopsAsync()
+    public async Task<IEnumerable<BarberShop>> GetAllBarberShops()
     {
         return await context.BarberShops
             .Include(bs => bs.Barbers)
@@ -16,7 +16,7 @@ public class BarberShopRepository(ApplicationDbContext context) : IBarberShop
         
     }
 
-    public async Task<BarberShop?> GetBarberShopByIdAsync(int id)
+    public async Task<BarberShop?> GetBarberShopById(int id)
     {
         return await context.BarberShops
             .Include(bs => bs.Barbers)

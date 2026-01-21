@@ -12,27 +12,14 @@ public class BarberShopController(IBarberShop repository) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BarberShop>>> GetAllBarberShops()
     {
-        var barberShops = await repository.GetAllBarberShopsAsync();
+        var barberShops = await repository.GetAllBarberShops();
         return Ok(barberShops);
     }
     // GET: api/BarberShop/{id}
     [HttpGet("{id}")]
     public async Task<ActionResult<BarberShop>> GetBarberShopById(int id)
     {
-        var barberShop = await repository.GetBarberShopByIdAsync(id);
-        if (barberShop == null)
-        {
-            var firstBarberShop = new BarberShop
-            {
-                Id = 0,
-                Name = "Teste Name",
-                Address = "Teste Address",
-                PhoneNumber = "Teste PhoneNumber",
-                Email = "Teste Email",
-                Barbers = new List<Barber>()
-            };
-            return Ok(firstBarberShop);
-        }
+        var barberShop = await repository.GetBarberShopById(id);
         return Ok(barberShop);
     }
     // POST: api/BarberShop
