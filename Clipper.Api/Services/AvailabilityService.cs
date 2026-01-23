@@ -17,6 +17,8 @@ public class AvailabilityService(IAvailabilityService service)
 
         unavailableSlots.AddRange(appointments.Select(a => (a.StartTime.TimeOfDay, a.EndTime.TimeOfDay)));
         unavailableSlots.AddRange(timeBlocks.Select(tb => (tb.StartDateTime.TimeOfDay, tb.EndDateTime.TimeOfDay)));
+        if(schedule.LunchBreakStartTime < schedule.LunchBreakEndTime)
+            unavailableSlots.Add((schedule.LunchBreakStartTime, schedule.LunchBreakEndTime));
 
         var availableSlots = new List<TimeSpan>();
         var currentTime = schedule.StartTime;
@@ -28,7 +30,7 @@ public class AvailabilityService(IAvailabilityService service)
             {
                 availableSlots.Add(currentTime);
             }
-            currentTime += TimeSpan.FromMinutes(15); // Increment by 15 minutes
+            currentTime = currentTime.Add(appointmentDuration);
         }
 
         return availableSlots;
