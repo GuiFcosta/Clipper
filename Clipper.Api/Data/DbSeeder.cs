@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Clipper.Api.Data;
 
-public class DbSeeder
+public static class DbSeeder
 {
     public static async Task SeedRolesAndAdminAsync(IServiceProvider serviceProvider)
     {

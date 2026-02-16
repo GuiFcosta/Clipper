@@ -167,3 +167,6 @@ C:\Users\gbigu\RiderProjects\Clipper\Clipper.Api\bin\Debug\net9.0\Microsoft.AspN
 C:\Users\gbigu\RiderProjects\Clipper\Clipper.Api\bin\Debug\net9.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 C:\Users\gbigu\RiderProjects\Clipper\Clipper.Api\bin\Debug\net9.0\Microsoft.Extensions.Identity.Core.dll
 C:\Users\gbigu\RiderProjects\Clipper\Clipper.Api\bin\Debug\net9.0\Microsoft.Extensions.Identity.Stores.dll
+C:\Users\gbigu\RiderProjects\Clipper\Clipper.Api\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\gbigu\RiderProjects\Clipper\Clipper.Api\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\gbigu\RiderProjects\Clipper\Clipper.Api\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
