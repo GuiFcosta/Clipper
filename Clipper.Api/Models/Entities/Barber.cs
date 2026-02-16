@@ -18,6 +18,10 @@ public class Barber
     [Required, StringLength(100)]
     public string Address { get; set; } = null!;
     
+    // Link to the ApplicationUser for authentication and authorization
+    public string ApplicationUserId { get; set; } = string.Empty;
+    public ApplicationUser ApplicationUser { get; set; } = null!;
+    
     // Not required, as a barber might not be assigned to a barber shop yet
     public int? BarberShopId { get; set; }
     public BarberShop? BarberShop { get; set; }

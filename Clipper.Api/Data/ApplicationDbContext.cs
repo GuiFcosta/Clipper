@@ -1,10 +1,11 @@
 using Clipper.Api.Models.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Clipper.Api.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : DbContext(options)
+    : IdentityDbContext<ApplicationUser>(options)
 {
     public DbSet<BarberShop> BarberShops { get; set; }
     public DbSet<Barber> Barbers { get; set; }

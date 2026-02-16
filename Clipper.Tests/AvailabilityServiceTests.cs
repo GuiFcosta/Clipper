@@ -10,13 +10,13 @@ namespace Clipper.Tests;
 public class AvailabilityServiceTests
 {
     // Mock of the repository (fake object)
-    private readonly Mock<IAvailabilityService> _repoMock;
+    private readonly Mock<IAvailabilityServiceRepository> _repoMock;
     // Real service under test
     private readonly AvailabilityService _sut; // system under test
     
     public AvailabilityServiceTests()
     {
-        _repoMock = new Mock<IAvailabilityService>();
+        _repoMock = new Mock<IAvailabilityServiceRepository>();
         // Inject the mock into the service
         _sut = new AvailabilityService(_repoMock.Object);
     }

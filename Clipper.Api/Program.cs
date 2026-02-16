@@ -1,6 +1,8 @@
 using Clipper.Api.Data;
 using Clipper.Api.Interfaces;
+using Clipper.Api.Models.Entities;
 using Clipper.Api.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,13 @@ builder.Services.AddOpenApi();
 
 // Dependency Injection for Repositories
 builder.Services.AddScoped<IBarberShop, BarberShopRepository>();
+builder.Services.AddScoped<IBarber, BarberRepository>();
+builder.Services.AddScoped<IAvailabilityServiceRepository, AvailabilityServiceRepository>();
+
+// Configure Identity with ApplicationUser and IdentityRole
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 var app = builder.Build();
 

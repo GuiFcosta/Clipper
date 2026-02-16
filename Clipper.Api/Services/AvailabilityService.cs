@@ -2,16 +2,16 @@ using Clipper.Api.Interfaces;
 
 namespace Clipper.Api.Services;
 
-public class AvailabilityService(IAvailabilityService service)
+public class AvailabilityService(IAvailabilityServiceRepository serviceRepository)
 {
     public async Task<IEnumerable<TimeSpan>> GetAvailableTimeSlots(int barberId, DateOnly date, TimeSpan appointmentDuration)
     {
-        var schedule = await service.GetBarberScheduleAsync(barberId, date.DayOfWeek);
+        var schedule = await serviceRepository.GetBarberScheduleAsync(barberId, date.DayOfWeek);
         if (schedule == null)
             return Enumerable.Empty<TimeSpan>();
 
-        var appointments = await service.GetBarberAppointmentsAsync(barberId, date);
-        var timeBlocks = await service.GetBarberTimeBlocksAsync(barberId, date);
+        var appointments = await serviceRepository.GetBarberAppointmentsAsync(barberId, date);
+        var timeBlocks = await serviceRepository.GetBarberTimeBlocksAsync(barberId, date);
 
         var unavailableSlots = new List<(TimeSpan Start, TimeSpan End)>();
 

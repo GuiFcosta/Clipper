@@ -13,6 +13,9 @@ public class Customer
     [Required, StringLength(50)]
     public string Email { get; set; } = null!;
     
+    public string? ApplicationUserId { get; set; }
+    public ApplicationUser? ApplicationUser { get; set; }
+    
     // List of appointments for the customer
     public ICollection<Appointment>? Appointments { get; set; } = new List<Appointment>();
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Clipper.Api.Repositories;
 
-public class AvailabilityServiceRepository(ApplicationDbContext context) : IAvailabilityService
+public class AvailabilityServiceRepository(ApplicationDbContext context) : IAvailabilityServiceRepository
 {
     public async Task<BarberSchedule?> GetBarberScheduleAsync(int barberId, DayOfWeek dayOfWeek)
     {

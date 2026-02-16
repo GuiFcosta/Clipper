@@ -2,7 +2,7 @@ using Clipper.Api.Models.Entities;
 
 namespace Clipper.Api.Interfaces;
 
-public interface IAvailabilityService
+public interface IAvailabilityServiceRepository
 {
     // 1. Search for the barber's working hours on THAT day of the week
     Task<BarberSchedule?> GetBarberScheduleAsync(int barberId, DayOfWeek dayOfWeek);
