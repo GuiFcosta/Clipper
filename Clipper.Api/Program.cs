@@ -12,6 +12,25 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+    options.AddPolicy("DevCors",
+        corsBuilder =>
+        {
+            corsBuilder.WithOrigins("http://localhost:5000", "https://localhost:7220") // <- Clipper.Web
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+});
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString, b => b.MigrationsAssembly("Clipper.Api")));
@@ -56,6 +75,8 @@ else
 {
     app.UseHttpsRedirection();
 }
+
+app.UseCors("DevCors");
 
 app.UseAuthorization();
 app.MapControllers();
