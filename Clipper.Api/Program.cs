@@ -1,9 +1,12 @@
+using System.Text;
 using Clipper.Api.Data;
 using Clipper.Api.Interfaces;
 using Clipper.Api.Models.Entities;
 using Clipper.Api.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,11 +44,39 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IBarberShop, BarberShopRepository>();
 builder.Services.AddScoped<IBarber, BarberRepository>();
 builder.Services.AddScoped<IAvailabilityServiceRepository, AvailabilityServiceRepository>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 // Configure Identity with ApplicationUser and IdentityRole
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+// Configure JWT Authentication
+var jwtSecretKey = builder.Configuration["Jwt:Key"] ??
+                   throw new InvalidOperationException("Jwt:Key is not configured.");
+var key = Encoding.ASCII.GetBytes(jwtSecretKey);
+
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false; // Em produção deve ser true
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero // Remove o atraso padrão de 5 minutos
+        };
+    });
 
 var app = builder.Build();
 
@@ -78,6 +109,7 @@ else
 
 app.UseCors("DevCors");
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
