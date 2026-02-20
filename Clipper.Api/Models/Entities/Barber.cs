@@ -19,6 +19,7 @@ public class Barber
     public string Address { get; set; } = null!;
     
     // Link to the ApplicationUser for authentication and authorization
+    [StringLength(450)]
     public string ApplicationUserId { get; set; } = string.Empty;
     public ApplicationUser ApplicationUser { get; set; } = null!;
     

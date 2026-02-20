@@ -1,10 +1,13 @@
 using Clipper.Api.Models.Entities;
+using Clipper.Api.Services;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Clipper.Api.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+public class ApplicationDbContext(
+    DbContextOptions<ApplicationDbContext> options,
+    ICurrentUserService currentUserService)
     : IdentityDbContext<ApplicationUser>(options)
 {
     public DbSet<BarberShop> BarberShops { get; set; }
@@ -21,6 +24,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         
         // Example of a global query filter (uncomment and implement _currentBarberShopId as needed)
         // builder.Entity<BarberShop>().HasQueryFilter(b => b.Id == _currentBarberShopId);
+        
+        // builder.Entity<BarberShop>()
+        //     .HasQueryFilter(b => !currentUserService.GetBarberShopId().HasValue 
+        //                          || b.Id == currentUserService.GetBarberShopId()!.Value);
+        //
+        // builder.Entity<Barber>()
+        //     .HasQueryFilter(x => !currentUserService.GetBarberShopId().HasValue 
+        //                          || x.BarberShopId == currentUserService.GetBarberShopId()!.Value);
+        //
+        // builder.Entity<Appointment>()
+        //     .HasQueryFilter(x => !currentUserService.GetBarberShopId().HasValue 
+        //                          || x.BarberShopId == currentUserService.GetBarberShopId()!.Value);
 
         // Configuration for BarberShop entity
         builder.Entity<BarberShop>(entity =>

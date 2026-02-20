@@ -3,6 +3,7 @@ using Clipper.Api.Data;
 using Clipper.Api.Interfaces;
 using Clipper.Api.Models.Entities;
 using Clipper.Api.Repositories;
+using Clipper.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString, b => b.MigrationsAssembly("Clipper.Api")));
 
 builder.Services.AddOpenApi();
+
+// Dependency Injection for Services
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Dependency Injection for Repositories
 builder.Services.AddScoped<IBarberShop, BarberShopRepository>();

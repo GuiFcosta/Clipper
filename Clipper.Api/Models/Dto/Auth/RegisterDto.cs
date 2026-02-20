@@ -25,8 +25,18 @@ public class RegisterDto
     // Required only for "Barber", optional for "Customer"
     public string? Nif { get; set; }
     public string? Address { get; set; }
+    
+    [Required, StringLength(12)]
+    public string PhoneNumber { get; set; } = null!;
 
     // Role is required to determine if the user is a "Barber" or "Customer"
     [Required(ErrorMessage = "The role is required.")]
     public string Role { get; set; } = string.Empty;
+    
+    // BarberShopId (required for Barber role)
+    public int? BarberShopId { get; set; }
+    
+    // Optional: BarberShop details for BarberShopOwner role
+    public string? BarberShopName { get; set; }
+    public string? BarberShopAddress { get; set; }
 }
