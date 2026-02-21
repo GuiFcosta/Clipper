@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Clipper.Api.Repositories;
 
-public class BarberShopRepository(ApplicationDbContext context) : IBarberShop
+public class BarberShopRepository(ApplicationDbContext context) : IBarberShopRepository
 {
-    public async Task<IEnumerable<BarberShop>> GetAllBarberShops()
+    public async Task<IEnumerable<BarberShop>> GetAllBarberShopsAsync()
     {
         return await context.BarberShops
             .Include(bs => bs.Barbers)
@@ -16,7 +16,7 @@ public class BarberShopRepository(ApplicationDbContext context) : IBarberShop
         
     }
 
-    public async Task<BarberShop?> GetBarberShopById(int id)
+    public async Task<BarberShop?> GetBarberShopByIdAsync(int id)
     {
         return await context.BarberShops
             .Include(bs => bs.Barbers)
@@ -24,19 +24,19 @@ public class BarberShopRepository(ApplicationDbContext context) : IBarberShop
         
     }
     
-    public Task CreateBarberShop(BarberShop barberShop)
+    public Task CreateBarberShopAsync(BarberShop barberShop)
     {
         context.BarberShops.Add(barberShop);
         return context.SaveChangesAsync();
     }
     
-    public async Task UpdateBarberShop(BarberShop barberShop)
+    public async Task UpdateBarberShopAsync(BarberShop barberShop)
     {
         context.BarberShops.Update(barberShop);
         await context.SaveChangesAsync();
     }
     
-    public async Task DeleteBarberShop(int id)
+    public async Task DeleteBarberShopAsync(int id)
     {
         var barberShop = await context.BarberShops.FindAsync(id);
         if (barberShop == null)

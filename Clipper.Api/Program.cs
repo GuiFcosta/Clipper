@@ -46,8 +46,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Dependency Injection for Repositories
-builder.Services.AddScoped<IBarberShop, BarberShopRepository>();
-builder.Services.AddScoped<IBarber, BarberRepository>();
+builder.Services.AddScoped<IBarberShopRepository, BarberShopRepository>();
+builder.Services.AddScoped<IBarberRepository, BarberRepository>();
 builder.Services.AddScoped<IAvailabilityServiceRepository, AvailabilityServiceRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 

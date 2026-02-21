@@ -2,7 +2,7 @@ using Clipper.Api.Models.Entities;
 
 namespace Clipper.Api.Interfaces;
 
-public interface IBarber
+public interface IBarberRepository
 {
     Task<IEnumerable<Barber>> GetAllBarbers();
     Task<IEnumerable<Barber>> GetAllBarbersFromBarberShop(int barberShopId);

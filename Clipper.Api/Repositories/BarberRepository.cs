@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Clipper.Api.Repositories;
 
-public class BarberRepository(ApplicationDbContext context) : IBarber
+public class BarberRepository(ApplicationDbContext context) : IBarberRepository
 {
     public async Task<IEnumerable<Barber>> GetAllBarbers()
     {

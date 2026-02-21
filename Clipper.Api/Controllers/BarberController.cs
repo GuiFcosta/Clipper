@@ -6,7 +6,7 @@ namespace Clipper.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class BarberController(IBarber repository) : ControllerBase
+public class BarberController(IBarberRepository repository) : ControllerBase
 {
     // GET: api/Barber
     [HttpGet]
