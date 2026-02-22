@@ -8,7 +8,7 @@ namespace Clipper.Api.Repositories;
 
 public class BarberShopRepository(ApplicationDbContext context) : IBarberShopRepository
 {
-    public async Task<IEnumerable<BarberShop>> GetAllBarberShopsAsync()
+    public async Task<IEnumerable<BarberShop>> GetAllBarberShops()
     {
         return await context.BarberShops
             .Include(bs => bs.Barbers)
@@ -16,7 +16,7 @@ public class BarberShopRepository(ApplicationDbContext context) : IBarberShopRep
         
     }
 
-    public async Task<BarberShop?> GetBarberShopByIdAsync(int id)
+    public async Task<BarberShop?> GetBarberShopById(int id)
     {
         return await context.BarberShops
             .Include(bs => bs.Barbers)
@@ -24,19 +24,19 @@ public class BarberShopRepository(ApplicationDbContext context) : IBarberShopRep
         
     }
     
-    public Task CreateBarberShopAsync(BarberShop barberShop)
+    public Task CreateBarberShop(BarberShop barberShop)
     {
         context.BarberShops.Add(barberShop);
         return context.SaveChangesAsync();
     }
     
-    public async Task UpdateBarberShopAsync(BarberShop barberShop)
+    public async Task UpdateBarberShop(BarberShop barberShop)
     {
         context.BarberShops.Update(barberShop);
         await context.SaveChangesAsync();
     }
     
-    public async Task DeleteBarberShopAsync(int id)
+    public async Task DeleteBarberShop(int id)
     {
         var barberShop = await context.BarberShops.FindAsync(id);
         if (barberShop == null)

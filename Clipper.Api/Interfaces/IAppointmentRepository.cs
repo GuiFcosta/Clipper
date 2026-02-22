@@ -4,10 +4,10 @@ namespace Clipper.Api.Interfaces;
 
 public interface IAppointmentRepository
 {
-    Task<IEnumerable<Appointment>> GetByBarberAndDateAsync(int barberId, DateOnly date);
-    Task<IEnumerable<Appointment>> GetByCustomerAsync(int customerId);
-    Task<Appointment?> GetByIdAsync(int id);
-    Task<Service?> GetServiceDetailsAsync(int serviceId); 
-    Task<Appointment> CreateAsync(Appointment appointment);
-    Task UpdateAsync(Appointment appointment);
+    Task<IEnumerable<Appointment>> GetByBarberAndDate(int barberId, DateOnly date);
+    Task<IEnumerable<Appointment>> GetByCustomer(int customerId);
+    Task<Appointment?> GetAppointmentById(int id);
+    Task<Appointment> CreateAppointment(Appointment appointment);
+    Task UpdateAppointment(Appointment appointment);
+    Task DeleteAppointment(Appointment appointment);
 }

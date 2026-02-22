@@ -9,7 +9,7 @@ namespace Clipper.Api.Controllers;
 public class AuthController(IAuthRepository repository) : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+    public async Task<ActionResult> Register([FromBody] RegisterDto registerDto)
     {
         var userToRegister = await repository.RegisterAsync(registerDto);
         if (!userToRegister.IsSuccess)
@@ -18,7 +18,7 @@ public class AuthController(IAuthRepository repository) : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+    public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
     {
         var userToLogin = await repository.LoginAsync(loginDto);
         if (!userToLogin.IsSuccess)            

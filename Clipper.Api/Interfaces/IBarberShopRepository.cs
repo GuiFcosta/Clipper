@@ -5,9 +5,9 @@ namespace Clipper.Api.Interfaces;
 public interface IBarberShopRepository
 {
     // CRUD Operations for BarberShop
-    Task<IEnumerable<BarberShop>> GetAllBarberShopsAsync();
-    Task<BarberShop?> GetBarberShopByIdAsync(int id);
-    Task CreateBarberShopAsync(BarberShop barberShop);
-    Task UpdateBarberShopAsync(BarberShop barberShop);
-    Task DeleteBarberShopAsync(int id);
+    Task<IEnumerable<BarberShop>> GetAllBarberShops();
+    Task<BarberShop?> GetBarberShopById(int id);
+    Task CreateBarberShop(BarberShop barberShop);
+    Task UpdateBarberShop(BarberShop barberShop);
+    Task DeleteBarberShop(int id);
 }

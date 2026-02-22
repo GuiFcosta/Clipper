@@ -50,6 +50,7 @@ builder.Services.AddScoped<IBarberShopRepository, BarberShopRepository>();
 builder.Services.AddScoped<IBarberRepository, BarberRepository>();
 builder.Services.AddScoped<IAvailabilityServiceRepository, AvailabilityServiceRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 
 // Configure Identity with ApplicationUser and IdentityRole
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()

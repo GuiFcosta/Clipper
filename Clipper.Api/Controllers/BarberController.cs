@@ -42,7 +42,7 @@ public class BarberController(IBarberRepository repository) : ControllerBase
     
     // PUT: api/Barber/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateBarber(int id, [FromBody] Barber barber)
+    public async Task<ActionResult> UpdateBarber(int id, [FromBody] Barber barber)
     {
         if (id != barber.Id)
             return BadRequest();
@@ -52,7 +52,7 @@ public class BarberController(IBarberRepository repository) : ControllerBase
     
     // DELETE: api/Barber/{id}
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteBarber(int id)
+    public async Task<ActionResult> DeleteBarber(int id)
     {
         await repository.DeleteBarber(id);
         return NoContent();
