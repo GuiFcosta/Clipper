@@ -8,6 +8,7 @@ namespace Clipper.Api.Controllers;
 [Route("api/auth")]
 public class AuthController(IAuthRepository repository) : ControllerBase
 {
+    // POST: api/auth/register
     [HttpPost("register")]
     public async Task<ActionResult> Register([FromBody] RegisterDto registerDto)
     {
@@ -17,6 +18,7 @@ public class AuthController(IAuthRepository repository) : ControllerBase
         return Ok(userToRegister);
     }
 
+    // POST: api/auth/login
     [HttpPost("login")]
     public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
     {

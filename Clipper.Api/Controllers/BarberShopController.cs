@@ -8,28 +8,28 @@ namespace Clipper.Api.Controllers;
 [Route("api/barbershop")]
 public class BarberShopController(IBarberShopRepository repository) : ControllerBase
 {
-    // GET: api/BarberShop
+    // GET: api/barbershop
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BarberShop>>> GetAllBarberShops()
     {
         var barberShops = await repository.GetAllBarberShops();
         return Ok(barberShops);
     }
-    // GET: api/BarberShop/{id}
+    // GET: api/barbershop/{id}
     [HttpGet("{id}")]
     public async Task<ActionResult<BarberShop>> GetBarberShopById(int id)
     {
         var barberShop = await repository.GetBarberShopById(id);
         return Ok(barberShop);
     }
-    // POST: api/BarberShop
+    // POST: api/barbershop
     [HttpPost]
     public async Task<ActionResult> CreateBarberShop([FromBody] BarberShop barberShop)
     {
         await repository.CreateBarberShop(barberShop);
         return CreatedAtAction(nameof(GetBarberShopById), new { id = barberShop.Id }, barberShop);
     }
-    // PUT: api/BarberShop/{id}
+    // PUT: api/barbershop/{id}
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateBarberShop(int id, [FromBody] BarberShop barberShop)
     {
@@ -38,7 +38,7 @@ public class BarberShopController(IBarberShopRepository repository) : Controller
         await repository.UpdateBarberShop(barberShop);
         return NoContent();
     }
-    // DELETE: api/BarberShop/{id}
+    // DELETE: api/barbershop/{id}
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteBarberShop(int id)
     {

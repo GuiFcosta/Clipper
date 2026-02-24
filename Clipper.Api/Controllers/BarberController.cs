@@ -8,7 +8,7 @@ namespace Clipper.Api.Controllers;
 [Route("api/barber")]
 public class BarberController(IBarberRepository repository) : ControllerBase
 {
-    // GET: api/Barber
+    // GET: api/barber
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Barber>>> GetAllBarbers()
     {
@@ -16,7 +16,7 @@ public class BarberController(IBarberRepository repository) : ControllerBase
         return Ok(barbers);
     }
     
-    // GET: api/Barber/shop/{barberShopId}
+    // GET: api/barber/shop/{barberShopId}
     [HttpGet("shop/{barberShopId}")]
     public async Task<ActionResult<IEnumerable<Barber>>> GetAllBarbersFromBarberShop(int barberShopId)
     {
@@ -24,7 +24,7 @@ public class BarberController(IBarberRepository repository) : ControllerBase
         return Ok(barbers);
     }
     
-    // GET: api/Barber/{id}
+    // GET: api/barber/{id}
     [HttpGet("{id}")]
     public async Task<ActionResult<Barber>> GetBarberById(int id)
     {
@@ -32,7 +32,7 @@ public class BarberController(IBarberRepository repository) : ControllerBase
         return Ok(barber);
     }
     
-    // POST: api/Barber
+    // POST: api/barber
     [HttpPost]
     public async Task<ActionResult> CreateBarber([FromBody] Barber barber)
     {
@@ -40,7 +40,7 @@ public class BarberController(IBarberRepository repository) : ControllerBase
         return CreatedAtAction(nameof(GetBarberById), new { id = barber.Id }, barber);
     }
     
-    // PUT: api/Barber/{id}
+    // PUT: api/barber/{id}
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateBarber(int id, [FromBody] Barber barber)
     {
@@ -50,7 +50,7 @@ public class BarberController(IBarberRepository repository) : ControllerBase
         return NoContent();
     }
     
-    // DELETE: api/Barber/{id}
+    // DELETE: api/barber/{id}
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteBarber(int id)
     {
