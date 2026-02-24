@@ -1,6 +1,5 @@
 using Clipper.Api.Interfaces;
 using Clipper.Api.Models.Entities;
-using Clipper.Api.Repositories;
 using Clipper.Api.Services;
 using FluentAssertions;
 using Moq;

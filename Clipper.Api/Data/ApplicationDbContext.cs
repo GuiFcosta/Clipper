@@ -6,8 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Clipper.Api.Data;
 
 public class ApplicationDbContext(
-    DbContextOptions<ApplicationDbContext> options,
-    ICurrentUserService currentUserService)
+    DbContextOptions<ApplicationDbContext> options
+    //ICurrentUserService currentUserService
+)
     : IdentityDbContext<ApplicationUser>(options)
 {
     public DbSet<BarberShop> BarberShops { get; set; }
@@ -21,10 +22,10 @@ public class ApplicationDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        
+
         // Example of a global query filter (uncomment and implement _currentBarberShopId as needed)
         // builder.Entity<BarberShop>().HasQueryFilter(b => b.Id == _currentBarberShopId);
-        
+
         // builder.Entity<BarberShop>()
         //     .HasQueryFilter(b => !currentUserService.GetBarberShopId().HasValue 
         //                          || b.Id == currentUserService.GetBarberShopId()!.Value);
@@ -45,7 +46,7 @@ public class ApplicationDbContext(
                 .HasForeignKey(b => b.BarberShopId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a barber shop if it has barbers
         });
-        
+
         // Configuration for Barber entity
         builder.Entity<Barber>(entity =>
         {
@@ -54,24 +55,23 @@ public class ApplicationDbContext(
                 .WithMany(a => a.Barbers)
                 .HasForeignKey(a => a.BarberShopId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a barber if they have appointments
-            
+
             // Relation with Appointments
             entity.HasMany(b => b.Appointments)
                 .WithOne(b => b.Barber)
                 .HasForeignKey(a => a.BarberId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a barber if they have appointments
-            
+
             // Relation with TimeBlocks
             entity.HasMany(b => b.TimeBlocks)
                 .WithOne(tb => tb.Barber)
                 .HasForeignKey(tb => tb.BarberId)
                 .OnDelete(DeleteBehavior.Cascade); // Delete time blocks if barber is deleted
-            
+
             // Relation with BarberSchedule
             entity.HasMany(b => b.BarberSchedule)
                 .WithOne(bs => bs.Barber)
                 .HasForeignKey(bs => bs.BarberId);
-
         });
 
         // Configuration for BarberSchedule entity
@@ -91,19 +91,19 @@ public class ApplicationDbContext(
                 .WithMany(a => a.Appointments)
                 .HasForeignKey(a => a.BarberId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a barber if they have appointments
-            
+
             // Relation with Customer
             entity.HasOne(a => a.Customer)
                 .WithMany(c => c.Appointments)
                 .HasForeignKey(a => a.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a customer if they have appointments
-            
+
             // Relation with BarberShop
             entity.HasOne(a => a.BarberShop)
                 .WithMany()
                 .HasForeignKey(a => a.BarberShopId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a barber shop if it has appointments
-            
+
             // Relation with Service
             entity.HasOne(a => a.Service)
                 .WithMany()

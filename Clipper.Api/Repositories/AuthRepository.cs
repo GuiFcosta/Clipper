@@ -206,6 +206,7 @@ public class AuthRepository(
                         Name = user.FullName,
                         PhoneNumber = user.PhoneNumber ?? dto.PhoneNumber,
                         Email = user.Email!
+                        // ApplicationUser = user
                     };
                     context.Clients.Add(customer);
                     break;
