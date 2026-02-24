@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Clipper.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/customer")]
 public class CustomerController(ICustomerRepository repository) : ControllerBase
 {
     [HttpGet]
@@ -82,6 +82,21 @@ public class CustomerController(ICustomerRepository repository) : ControllerBase
         };
         await repository.CreateCustomer(customer);
         return CreatedAtAction(nameof(GetCustomerById), new { id = customer.Id }, customer);
+    }
+    
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateCustomer(int id, [FromBody] CustomerUpdateDto customerUpdateDto)
+    {
+        if (id != customerUpdateDto.Id)
+            return BadRequest();
+        var customer = await repository.GetCustomerById(id);
+        if (customer == null)
+            return NotFound();
+        customer.Name = customerUpdateDto.Name;
+        customer.Email = customerUpdateDto.Email;
+        customer.PhoneNumber = customerUpdateDto.PhoneNumber;
+        await repository.UpdateCustomer(customer);
+        return NoContent();
     }
     
     [HttpDelete("{id}")]

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Clipper.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
 public class AuthController(IAuthRepository repository) : ControllerBase
 {
     [HttpPost("register")]

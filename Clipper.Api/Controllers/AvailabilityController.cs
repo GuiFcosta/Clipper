@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace Clipper.Api.Controllers;
 
-public class AvailabilityController
+[ApiController]
+[Route("api/availability")]
+public class AvailabilityController : ControllerBase
 {
     
 }

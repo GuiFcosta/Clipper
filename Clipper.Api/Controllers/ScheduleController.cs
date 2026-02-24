@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace Clipper.Api.Controllers;
 
-public class ScheduleController
+[ApiController]
+[Route("api/schedule")]
+public class ScheduleController : ControllerBase
 {
     
 }

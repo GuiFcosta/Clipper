@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace Clipper.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/service")]
 public class ServiceController(IServiceRepository repository) : ControllerBase
 {
-    // GET: api/Service
+    // GET: api/service
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Service>>> GetAllServices()
     {
@@ -16,7 +16,7 @@ public class ServiceController(IServiceRepository repository) : ControllerBase
         return Ok(services);
     }
 
-    // GET: api/Service/{id}
+    // GET: api/service/{id}
     [HttpGet("{id}")]
     public async Task<ActionResult<Service>> GetServiceById(int id)
     {
@@ -26,7 +26,7 @@ public class ServiceController(IServiceRepository repository) : ControllerBase
         return Ok(service);
     }
 
-    // POST: api/Service
+    // POST: api/service
     [HttpPost]
     public async Task<ActionResult> CreateService([FromBody] Service service)
     {
@@ -34,7 +34,7 @@ public class ServiceController(IServiceRepository repository) : ControllerBase
         return CreatedAtAction(nameof(GetServiceById), new { id = service.Id }, service);
     }
 
-    // PUT: api/Service/{id}m 
+    // PUT: api/service/{id} 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateService(int id, [FromBody] Service service)
     {
@@ -44,7 +44,7 @@ public class ServiceController(IServiceRepository repository) : ControllerBase
         return NoContent();
     }
 
-    // DELETE: api/Service/{id}
+    // DELETE: api/service/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteService(int id)
     {

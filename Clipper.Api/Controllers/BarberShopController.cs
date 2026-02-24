@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Clipper.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/barbershop")]
 public class BarberShopController(IBarberShopRepository repository) : ControllerBase
 {
     // GET: api/BarberShop

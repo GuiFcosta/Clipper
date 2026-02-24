@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace Clipper.Api.Controllers;
 
-public class AppointmentController
+[ApiController]
+[Route("api/appointment")]
+public class AppointmentController : ControllerBase
 {
     
 }
