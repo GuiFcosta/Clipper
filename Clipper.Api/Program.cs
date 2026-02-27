@@ -33,6 +33,13 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader()
                 .AllowCredentials();
         });
+    options.AddPolicy("AllowReactApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173") // <- React app
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
 });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -52,6 +59,8 @@ builder.Services.AddScoped<IAvailabilityServiceRepository, AvailabilityServiceRe
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 
 // Configure Identity with ApplicationUser and IdentityRole
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -114,7 +123,7 @@ else
     app.UseHttpsRedirection();
 }
 
-app.UseCors("DevCors");
+app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
