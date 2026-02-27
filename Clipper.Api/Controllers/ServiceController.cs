@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Clipper.Api.Controllers;
 
 [ApiController]
-[Route("api/service")]
+[Route("api/[controller]")]
 public class ServiceController(IServiceRepository repository) : ControllerBase
 {
     // GET: api/service
