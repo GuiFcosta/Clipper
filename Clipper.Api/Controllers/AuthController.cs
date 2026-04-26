@@ -24,7 +24,7 @@ public class AuthController(IAuthRepository repository) : ControllerBase
     {
         var userToLogin = await repository.LoginAsync(loginDto);
         if (!userToLogin.IsSuccess)            
-            return BadRequest(userToLogin);
+            return Unauthorized(userToLogin);
         return Ok(userToLogin);
     }
 }
