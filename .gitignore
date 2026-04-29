@@ -64,7 +64,7 @@ logs/
 # Secret / environment / local config
 secrets.json
 appsettings.Development.json
-appsettings.json
+appsettings.local.json
 .env
 .env.local
 

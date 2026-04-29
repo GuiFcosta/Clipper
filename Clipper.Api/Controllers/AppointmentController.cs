@@ -1,8 +1,8 @@
 using Clipper.Api.Interfaces;
+using Clipper.Api.Models.Dto.Appointment;
 using Clipper.Api.Models.Entities;
 using Clipper.Api.Models.Enums;
 using Clipper.Api.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clipper.Api.Controllers;
@@ -45,7 +45,7 @@ public class AppointmentController(
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateAppointment([FromBody] Appointment appointment)
+    public async Task<ActionResult> CreateAppointment([FromBody] AppointmentCreateDto appointment)
     {
         // Validate the appointment details
         var service = await repository.GetServiceById(appointment.ServiceId);

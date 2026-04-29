@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Clipper.Api.Models.Entities;
 
@@ -25,6 +25,7 @@ public class Barber
     
     // Not required, as a barber might not be assigned to a barber shop yet
     public int? BarberShopId { get; set; }
+    [JsonIgnore]
     public BarberShop? BarberShop { get; set; }
     
     // Barber's schedule

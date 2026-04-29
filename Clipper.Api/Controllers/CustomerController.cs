@@ -11,10 +11,10 @@ public class CustomerController(ICustomerRepository repository) : ControllerBase
 {
     // GET: api/customer
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CustomerReadDto>>> GetAllCustomers()
+    public async Task<ActionResult<IEnumerable<CustomerDto>>> GetAllCustomers()
     {
         var customers = await repository.GetAllCustomers();
-        var customerDto = customers.Select(c => new CustomerReadDto
+        var customerDto = customers.Select(c => new CustomerDto
         {
             Id = c.Id,
             Name = c.Name,
@@ -26,12 +26,12 @@ public class CustomerController(ICustomerRepository repository) : ControllerBase
 
     // GET: api/customer/{id}
     [HttpGet("{id}")]
-    public async Task<ActionResult<CustomerReadDto>> GetCustomerById(int id)
+    public async Task<ActionResult<CustomerDto>> GetCustomerById(int id)
     {
         var customer = await repository.GetCustomerById(id);
         if (customer == null)
             return NotFound();
-        var customerDto = new CustomerReadDto
+        var customerDto = new CustomerDto
         {
             Id = customer.Id,
             Name = customer.Name,
@@ -43,12 +43,12 @@ public class CustomerController(ICustomerRepository repository) : ControllerBase
 
     // GET: api/customer/email/{email}
     [HttpGet("email/{email}")]
-    public async Task<ActionResult<CustomerReadDto>> GetCustomerByEmail(string email)
+    public async Task<ActionResult<CustomerDto>> GetCustomerByEmail(string email)
     {
         var customer = await repository.GetCustomerByEmail(email);
         if (customer == null)
             return NotFound();
-        var customerDto = new CustomerReadDto
+        var customerDto = new CustomerDto
         {
             Id = customer.Id,
             Name = customer.Name,
@@ -67,12 +67,12 @@ public class CustomerController(ICustomerRepository repository) : ControllerBase
     
     // GET: api/customer/name/{name}
     [HttpGet("name/{name}")]
-    public async Task<ActionResult<CustomerReadDto>> GetCustomerByName(string name)
+    public async Task<ActionResult<CustomerDto>> GetCustomerByName(string name)
     {
         var customer = await repository.GetCustomerByName(name);
         if (customer == null)
             return NotFound();
-        var customerDto = new CustomerReadDto
+        var customerDto = new CustomerDto
         {
             Id = customer.Id,
             Name = customer.Name,
@@ -96,7 +96,7 @@ public class CustomerController(ICustomerRepository repository) : ControllerBase
     }
     
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCustomer(int id, [FromBody] CustomerUpdateDto customerUpdateDto)
+    public async Task<IActionResult> UpdateCustomer(int id, [FromBody] CustomerDto customerUpdateDto)
     {
         if (id != customerUpdateDto.Id)
             return BadRequest();
