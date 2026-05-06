@@ -47,7 +47,7 @@ public class BarberController(IBarberRepository repository) : ControllerBase
     
     // GET: api/barber/{id}
     [HttpGet("{id}")]
-    public async Task<ActionResult<Barber>> GetBarberById(int id)
+    public async Task<ActionResult<BarberDto>> GetBarberById(int id)
     {
         var barber = await repository.GetBarberById(id);
         if (barber == null)

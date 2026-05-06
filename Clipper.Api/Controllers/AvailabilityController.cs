@@ -1,3 +1,4 @@
+using Clipper.Api.Interfaces;
 using Clipper.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -5,7 +6,7 @@ namespace Clipper.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AvailabilityController(AvailabilityService service) : ControllerBase
+public class AvailabilityController(AvailabilityService service, IServiceRepository serviceRepository) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<TimeSpan>> GetAvailableTimeSlots(int barberId, DateOnly date, TimeSpan appointmentDuration)
