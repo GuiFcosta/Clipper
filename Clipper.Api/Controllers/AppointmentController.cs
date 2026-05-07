@@ -52,8 +52,8 @@ public class AppointmentController(
         var service = await repository.GetServiceById(appointment.ServiceId);
         if (service == null)
             return BadRequest("Service not found.");
+        
         var serviceDuration = TimeSpan.FromMinutes(service.Duration);
-
         var dateTimeResult = DateTime.ParseExact(appointment.AppointmentDate + " " + appointment.AppointmentTime,
             "yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture);
         

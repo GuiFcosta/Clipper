@@ -1,14 +1,8 @@
 
 namespace Clipper.Api.Models.Dto.Appointment;
 
-/// <summary>
-/// Extension methods para mapear Appointment para AppointmentDto
-/// </summary>
 public static class AppointmentMappingExtensions
 {
-    /// <summary>
-    /// Converte um Appointment para AppointmentDto
-    /// </summary>
     public static AppointmentDto ToDto(this Entities.Appointment appointment)
     {
         if (appointment == null)
@@ -17,7 +11,7 @@ public static class AppointmentMappingExtensions
         return new AppointmentDto
         {
             Id = appointment.Id,
-            StartTime = appointment.StartTime,
+            StartTime = appointment.StartTime.ToString("yyyy-MM-dd HH:mm"),
             EndTime = appointment.EndTime,
             Status = appointment.Status,
             Notes = appointment.Notes,
@@ -42,15 +36,9 @@ public static class AppointmentMappingExtensions
             ServicePrice = appointment.Service?.Price
         };
     }
-
-    /// <summary>
-    /// Converte uma coleção de Appointments para AppointmentDtos
-    /// </summary>
+    
     public static IEnumerable<AppointmentDto> ToDtos(this IEnumerable<Entities.Appointment> appointments)
-    {
-        if (appointments == null)
-            throw new ArgumentNullException(nameof(appointments));
-
+    { 
         return appointments.Select(a => a.ToDto());
     }
 }

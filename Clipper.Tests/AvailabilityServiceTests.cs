@@ -45,9 +45,9 @@ public class AvailabilityServiceTests
         schedule ??= new BarberSchedule
         {
             StartTime = new TimeSpan(9, 0, 0),
-            EndTime = new TimeSpan(17, 0, 0),
-            LunchBreakStartTime = new TimeSpan(12, 0, 0),
-            LunchBreakEndTime = new TimeSpan(13, 0, 0)
+            EndTime = new TimeSpan(18, 0, 0),
+            LunchBreakStartTime = new TimeSpan(13, 0, 0),
+            LunchBreakEndTime = new TimeSpan(14, 0, 0)
         };
 
         _repoMock.Setup(r => r.GetBarberScheduleAsync(barberId, date.DayOfWeek))
@@ -67,7 +67,7 @@ public class AvailabilityServiceTests
     [Fact]
     public async Task GetAvailableTimeSlots_SimpleScenario_ShouldReturnCorrectSlots()
     {
-        // Arrange - barbeiro trabalha 09:00-17:00 com pausa 12:00-13:00, sem consultas
+        // Arrange - barbeiro trabalha 09:00-18:00 com pausa 13:00-14:00, sem consultas
         var barberId = 1;
         var date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)); // Amanhã (futuro)
         var serviceDuration = TimeSpan.FromMinutes(30);
@@ -75,9 +75,9 @@ public class AvailabilityServiceTests
         var schedule = new BarberSchedule
         {
             StartTime = new TimeSpan(9, 0, 0),
-            EndTime = new TimeSpan(17, 0, 0),
-            LunchBreakStartTime = new TimeSpan(12, 0, 0),
-            LunchBreakEndTime = new TimeSpan(13, 0, 0)
+            EndTime = new TimeSpan(18, 0, 0),
+            LunchBreakStartTime = new TimeSpan(13, 0, 0),
+            LunchBreakEndTime = new TimeSpan(14, 0, 0)
         };
 
         SetupDefaultMocks(barberId, date, schedule);
@@ -87,20 +87,20 @@ public class AvailabilityServiceTests
         var slots = result.ToList();
 
         // Assert - slots a cada 15 min (09:00, 09:15, 09:30... até 16:45)
-        // Excluir pausa de almoço (12:00-13:00)
+        // Excluir pausa de almoço (13:00-14:00)
         slots.Should().NotBeEmpty();
         slots.Should().Contain(new TimeSpan(9, 0, 0));
         slots.Should().Contain(new TimeSpan(9, 15, 0));
         slots.Should().Contain(new TimeSpan(9, 30, 0));
         
         // Pausa de almoço deve estar ausente
-        slots.Should().NotContain(new TimeSpan(12, 0, 0));
-        slots.Should().NotContain(new TimeSpan(12, 15, 0));
-        slots.Should().NotContain(new TimeSpan(12, 30, 0));
-        slots.Should().NotContain(new TimeSpan(12, 45, 0));
+        slots.Should().NotContain(new TimeSpan(13, 0, 0));
+        slots.Should().NotContain(new TimeSpan(13, 15, 0));
+        slots.Should().NotContain(new TimeSpan(13, 30, 0));
+        slots.Should().NotContain(new TimeSpan(13, 45, 0));
         
         // Depois da pausa deve ter slots disponíveis
-        slots.Should().Contain(new TimeSpan(13, 0, 0));
+        slots.Should().Contain(new TimeSpan(14, 0, 0));
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public class AvailabilityServiceTests
         var schedule = new BarberSchedule
         {
             StartTime = new TimeSpan(9, 0, 0),
-            EndTime = new TimeSpan(17, 0, 0),
+            EndTime = new TimeSpan(18, 0, 0),
             LunchBreakStartTime = TimeSpan.Zero,
             LunchBreakEndTime = TimeSpan.Zero
         };
@@ -154,7 +154,7 @@ public class AvailabilityServiceTests
         var schedule = new BarberSchedule
         {
             StartTime = new TimeSpan(9, 0, 0),
-            EndTime = new TimeSpan(17, 0, 0),
+            EndTime = new TimeSpan(18, 0, 0),
             LunchBreakStartTime = TimeSpan.Zero,
             LunchBreakEndTime = TimeSpan.Zero
         };
@@ -219,7 +219,7 @@ public class AvailabilityServiceTests
         var schedule = new BarberSchedule
         {
             StartTime = new TimeSpan(9, 0, 0),
-            EndTime = new TimeSpan(17, 0, 0),
+            EndTime = new TimeSpan(18, 0, 0),
             LunchBreakStartTime = TimeSpan.Zero,
             LunchBreakEndTime = TimeSpan.Zero
         };
@@ -418,7 +418,7 @@ public class AvailabilityServiceTests
         var schedule = new BarberSchedule
         {
             StartTime = new TimeSpan(9, 0, 0),
-            EndTime = new TimeSpan(17, 0, 0),
+            EndTime = new TimeSpan(18, 0, 0),
             LunchBreakStartTime = new TimeSpan(0, 0, 0),
             LunchBreakEndTime = new TimeSpan(0, 0, 0) // Sem almoço
         };

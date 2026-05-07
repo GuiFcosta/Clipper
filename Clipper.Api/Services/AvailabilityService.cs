@@ -1,30 +1,20 @@
 using Clipper.Api.Interfaces;
+using Clipper.Api.Models.Entities;
 
 namespace Clipper.Api.Services;
 
 public class AvailabilityService(IAvailabilityServiceRepository serviceRepository)
 {
-    /// <summary>
-    /// Intervalo padrão para os slots disponíveis (em minutos).
-    /// Por exemplo: 15 minutos para gerar slots a cada 15 min (09:00, 09:15, 09:30, etc)
-    /// </summary>
     private const int SlotIntervalMinutes = 15;
-
-    /// <summary>
-    /// Obtém os slots de tempo disponíveis para um barbeiro numa data específica.
-    /// </summary>
-    /// <param name="barberId">ID do barbeiro</param>
-    /// <param name="date">Data para a qual obter disponibilidade</param>
-    /// <param name="appointmentDuration">Duração da consulta (ex: 30 minutos)</param>
-    /// <returns>Lista de horas de início disponíveis</returns>
+    
     public async Task<IEnumerable<TimeSpan>> GetAvailableTimeSlots(int barberId, DateOnly date, TimeSpan appointmentDuration)
     {
         // Validações
         if (barberId <= 0)
-            throw new ArgumentException("BarberId deve ser positivo.", nameof(barberId));
+            throw new ArgumentException("BarberId should be positive.", nameof(barberId));
 
         if (appointmentDuration <= TimeSpan.Zero)
-            throw new ArgumentException("A duração da consulta deve ser positiva.", nameof(appointmentDuration));
+            throw new ArgumentException("The appointment duration should be greater than zero.", nameof(appointmentDuration));
 
         if (date < DateOnly.FromDateTime(DateTime.Now))
             return Enumerable.Empty<TimeSpan>();
@@ -42,11 +32,8 @@ public class AvailabilityService(IAvailabilityServiceRepository serviceRepositor
 
         return availableSlots;
     }
-
-    /// <summary>
-    /// Obtém todos os períodos ocupados (consultas, blocos de tempo e pausa de almoço).
-    /// </summary>
-    private async Task<List<(TimeSpan Start, TimeSpan End)>> GetOccupiedSlotsAsync(int barberId, DateOnly date, Models.Entities.BarberSchedule schedule)
+    
+    private async Task<List<(TimeSpan Start, TimeSpan End)>> GetOccupiedSlotsAsync(int barberId, DateOnly date, BarberSchedule schedule)
     {
         var occupiedSlots = new List<(TimeSpan Start, TimeSpan End)>();
 
@@ -64,11 +51,8 @@ public class AvailabilityService(IAvailabilityServiceRepository serviceRepositor
 
         return occupiedSlots;
     }
-
-    /// <summary>
-    /// Gera a lista de slots disponíveis baseado no horário e períodos ocupados.
-    /// </summary>
-    private List<TimeSpan> GenerateAvailableSlots(Models.Entities.BarberSchedule schedule, List<(TimeSpan Start, TimeSpan End)> occupiedSlots, TimeSpan appointmentDuration)
+    
+    private List<TimeSpan> GenerateAvailableSlots(BarberSchedule schedule, List<(TimeSpan Start, TimeSpan End)> occupiedSlots, TimeSpan appointmentDuration)
     {
         var availableSlots = new List<TimeSpan>();
         var slotInterval = TimeSpan.FromMinutes(SlotIntervalMinutes);
@@ -89,10 +73,7 @@ public class AvailabilityService(IAvailabilityServiceRepository serviceRepositor
 
         return availableSlots;
     }
-
-    /// <summary>
-    /// Verifica se um slot de tempo colide com algum período ocupado.
-    /// </summary>
+    
     private static bool HasConflict(TimeSpan slotStart, TimeSpan slotEnd, List<(TimeSpan Start, TimeSpan End)> occupiedSlots)
     {
         return occupiedSlots.Any(occupied => slotStart < occupied.End && slotEnd > occupied.Start);

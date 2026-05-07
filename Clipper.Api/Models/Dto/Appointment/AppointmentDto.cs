@@ -15,7 +15,7 @@ public class AppointmentDto
     /// <summary>
     /// Hora de início da consulta
     /// </summary>
-    public DateTime StartTime { get; set; }
+    public string StartTime { get; set; }
 
     /// <summary>
     /// Hora de fim da consulta (calculada com base na duração do serviço)
