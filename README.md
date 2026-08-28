@@ -1,5 +1,5 @@
 #### 2. README.md do Barbershop Hub API
-```markdown
+
 # Barbershop Hub API
 
 [![Status](https://img.shields.io/badge/status-in__development-orange.svg)]()
