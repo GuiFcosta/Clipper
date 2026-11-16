@@ -1,5 +1,6 @@
 using Clipper.Api.Interfaces;
 using Clipper.Api.Models.Entities;
+using Clipper.Api.Models.Enums;
 
 namespace Clipper.Api.Services;
 
@@ -16,7 +17,7 @@ public class AvailabilityService(IAvailabilityServiceRepository serviceRepositor
         if (appointmentDuration <= TimeSpan.Zero)
             throw new ArgumentException("The appointment duration should be greater than zero.", nameof(appointmentDuration));
 
-        if (date < DateOnly.FromDateTime(DateTime.Now))
+        if (date < DateOnly.FromDateTime(DateTime.UtcNow))
             return Enumerable.Empty<TimeSpan>();
 
         // Obter o horário do barbeiro
@@ -37,13 +38,28 @@ public class AvailabilityService(IAvailabilityServiceRepository serviceRepositor
     {
         var occupiedSlots = new List<(TimeSpan Start, TimeSpan End)>();
 
-        // Adicionar consultas agendadas
+        // Adicionar consultas agendadas (ignorando canceladas por segurança também no serviço)
         var appointments = await serviceRepository.GetBarberAppointmentsAsync(barberId, date);
-        occupiedSlots.AddRange(appointments.Select(a => (a.StartTime.TimeOfDay, a.EndTime.TimeOfDay)));
+        occupiedSlots.AddRange(appointments
+            .Where(a => a.Status != AppointmentStatus.Cancelled)
+            .Select(a => (a.StartTime.TimeOfDay, a.EndTime.TimeOfDay)));
 
-        // Adicionar blocos de tempo indisponíveis
+        // Adicionar blocos de tempo indisponíveis (suportando blocos intradia e múltiplos dias)
         var timeBlocks = await serviceRepository.GetBarberTimeBlocksAsync(barberId, date);
-        occupiedSlots.AddRange(timeBlocks.Select(tb => (tb.StartDateTime.TimeOfDay, tb.EndDateTime.TimeOfDay)));
+        var dayStart = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        var dayEnd = date.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+
+        foreach (var tb in timeBlocks)
+        {
+            var startUtc = DateTime.SpecifyKind(tb.StartDateTime, DateTimeKind.Utc);
+            var endUtc = DateTime.SpecifyKind(tb.EndDateTime, DateTimeKind.Utc);
+
+            var blockStart = startUtc <= dayStart ? TimeSpan.Zero : startUtc.TimeOfDay;
+            var blockEnd = endUtc >= dayEnd ? TimeSpan.FromHours(24) : endUtc.TimeOfDay;
+
+            if (blockStart < blockEnd)
+                occupiedSlots.Add((blockStart, blockEnd));
+        }
 
         // Adicionar pausa de almoço (se configurada)
         if (schedule.LunchBreakStartTime < schedule.LunchBreakEndTime)

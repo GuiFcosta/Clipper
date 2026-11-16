@@ -17,13 +17,15 @@ public class AppointmentRepository(ApplicationDbContext context) : IAppointmentR
     }
     public async Task<IEnumerable<Appointment>> GetByBarberAndDate(int barberId, DateOnly date)
     {
-        var startOfDay = date.ToDateTime(TimeOnly.MinValue);
-        var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
+        var startOfDayUtc = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        var endOfDayUtc = date.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
 
         return await context.Appointments
             .Include(a => a.Customer)
+            .Include(a => a.Barber)
+            .Include(a => a.BarberShop)
             .Include(a => a.Service)
-            .Where(a => a.BarberId == barberId && a.StartTime >= startOfDay && a.StartTime <= endOfDay)
+            .Where(a => a.BarberId == barberId && a.StartTime >= startOfDayUtc && a.StartTime < endOfDayUtc)
             .OrderBy(a => a.StartTime)
             .ToListAsync();
     }

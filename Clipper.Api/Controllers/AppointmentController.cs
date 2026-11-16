@@ -54,8 +54,9 @@ public class AppointmentController(
             return BadRequest("Service not found.");
         
         var serviceDuration = TimeSpan.FromMinutes(service.Duration);
-        var dateTimeResult = DateTime.ParseExact(appointment.AppointmentDate + " " + appointment.AppointmentTime,
+        var parsedDateTime = DateTime.ParseExact(appointment.AppointmentDate + " " + appointment.AppointmentTime,
             "yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+        var dateTimeResult = DateTime.SpecifyKind(parsedDateTime, DateTimeKind.Utc);
         
         // Check if the appointment time is available
         var date = DateOnly.FromDateTime(dateTimeResult);

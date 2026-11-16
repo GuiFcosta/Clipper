@@ -234,32 +234,65 @@ public class AvailabilityServiceTests
     }
 
     [Fact]
-    public void GetAvailableTimeSlots_InvalidBarberId_ShouldThrow()
+    public async Task GetAvailableTimeSlots_InvalidBarberId_ShouldThrow()
     {
         // Arrange
         var barberId = -1; // ID inválido
-        var date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
+        var date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
 
         // Act & Assert
-        _sut.Invoking(r => r.GetAvailableTimeSlots(barberId, date, TimeSpan.FromMinutes(30)))
+        await _sut.Invoking(r => r.GetAvailableTimeSlots(barberId, date, TimeSpan.FromMinutes(30)))
             .Should()
             .ThrowAsync<ArgumentException>()
-            .WithMessage("*BarberId deve ser positivo*");
+            .WithMessage("*BarberId should be positive*");
     }
 
     [Fact]
-    public void GetAvailableTimeSlots_InvalidDuration_ShouldThrow()
+    public async Task GetAvailableTimeSlots_InvalidDuration_ShouldThrow()
     {
         // Arrange
         var barberId = 1;
-        var date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
+        var date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
         var invalidDuration = TimeSpan.FromMinutes(-30); // Duração inválida
 
         // Act & Assert
-        _sut.Invoking(r => r.GetAvailableTimeSlots(barberId, date, invalidDuration))
+        await _sut.Invoking(r => r.GetAvailableTimeSlots(barberId, date, invalidDuration))
             .Should()
             .ThrowAsync<ArgumentException>()
-            .WithMessage("*A duração da consulta deve ser positiva*");
+            .WithMessage("*The appointment duration should be greater than zero*");
+    }
+
+    [Fact]
+    public async Task GetAvailableTimeSlots_CancelledAppointment_ShouldNotBlockSlot()
+    {
+        // Arrange
+        var barberId = 1;
+        var date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var baseDateTime = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+
+        var schedule = new BarberSchedule
+        {
+            StartTime = new TimeSpan(9, 0, 0),
+            EndTime = new TimeSpan(12, 0, 0),
+            LunchBreakStartTime = TimeSpan.Zero,
+            LunchBreakEndTime = TimeSpan.Zero
+        };
+
+        var cancelledAppointment = CreateAppointment(baseDateTime.AddHours(10), 30);
+        cancelledAppointment.Status = AppointmentStatus.Cancelled;
+
+        _repoMock.Setup(r => r.GetBarberScheduleAsync(barberId, date.DayOfWeek))
+            .ReturnsAsync(schedule);
+        _repoMock.Setup(r => r.GetBarberAppointmentsAsync(barberId, date))
+            .ReturnsAsync(new List<Appointment> { cancelledAppointment });
+        _repoMock.Setup(r => r.GetBarberTimeBlocksAsync(barberId, date))
+            .ReturnsAsync(new List<TimeBlock>());
+
+        // Act
+        var result = await _sut.GetAvailableTimeSlots(barberId, date, TimeSpan.FromMinutes(30));
+
+        // Assert
+        result.Should().Contain(new TimeSpan(10, 0, 0));
     }
 
     [Fact]
