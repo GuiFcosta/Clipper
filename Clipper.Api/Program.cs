@@ -44,7 +44,7 @@ builder.Services.AddCors(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString, b => b.MigrationsAssembly("Clipper.Api")));
+    options.UseNpgsql(connectionString, b => b.MigrationsAssembly("Clipper.Api")));
 
 builder.Services.AddOpenApi();
 
