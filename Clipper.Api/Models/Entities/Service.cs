@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Clipper.Api.Models.Entities;
@@ -17,4 +18,9 @@ public class Service
     public decimal Price { get; set; }
     [Required]
     public bool IsActive { get; set; } = true;
+
+    [Required]
+    public int BarberShopId { get; set; }
+    [JsonIgnore]
+    public BarberShop BarberShop { get; set; } = null!;
 }

@@ -45,6 +45,11 @@ public class ApplicationDbContext(
                 .WithOne(b => b.BarberShop)
                 .HasForeignKey(b => b.BarberShopId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a barber shop if it has barbers
+
+            entity.HasMany(bs => bs.Services)
+                .WithOne(s => s.BarberShop)
+                .HasForeignKey(s => s.BarberShopId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a barber shop if it has services
         });
 
         // Configuration for Barber entity
