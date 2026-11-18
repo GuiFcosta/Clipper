@@ -10,6 +10,7 @@ public interface IAuthService
     Task<Result<AuthResponseDto>> LoginAsync(LoginDto dto);
     Task<Result<AuthResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto dto);
     Task<Result> RevokeTokenAsync(RevokeTokenRequestDto dto);
+    Task<Result<CurrentUserDto>> GetMeAsync();
 }
 
 public class AuthService(
@@ -73,5 +74,24 @@ public class AuthService(
         }
 
         return Result.Success();
+    }
+
+    public async Task<Result<CurrentUserDto>> GetMeAsync()
+    {
+        var userId = currentUserService.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Result.Failure<CurrentUserDto>(
+                Error.Unauthorized("Auth.Unauthorized", "User is not authenticated."));
+        }
+
+        var user = await authRepository.GetCurrentUserAsync(userId);
+        if (user == null)
+        {
+            return Result.Failure<CurrentUserDto>(
+                Error.NotFound("Auth.UserNotFound", "Authenticated user was not found."));
+        }
+
+        return Result.Success(user);
     }
 }

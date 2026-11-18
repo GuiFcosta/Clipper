@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clipper.Api", "Clipper.Api\Clipper.Api.csproj", "{6AC25F1B-7BDD-4C70-9ADC-6C469B7DDC4C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clipper-api", "clipper-api\clipper-api.csproj", "{6AC25F1B-7BDD-4C70-9ADC-6C469B7DDC4C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clipper.Tests", "Clipper.Tests\Clipper.Tests.csproj", "{E21DD433-AA4A-48B9-BAF4-EA19ACE12DDE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clipper-tests", "clipper-tests\clipper-tests.csproj", "{E21DD433-AA4A-48B9-BAF4-EA19ACE12DDE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -46,6 +46,6 @@ The relational database focuses heavily on temporal scheduling logic:
 3. Apply migrations and run the API:
    ```bash
    dotnet tool restore
-   dotnet ef database update --project Clipper.Api --startup-project Clipper.Api
-   dotnet run --project Clipper.Api
+   dotnet ef database update --project clipper-api --startup-project clipper-api
+   dotnet run --project clipper-api
    ```

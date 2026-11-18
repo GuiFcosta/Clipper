@@ -53,4 +53,15 @@ public class AuthController(IAuthService authService) : ControllerBase
 
         return NoContent();
     }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult<CurrentUserDto>> Me()
+    {
+        var result = await authService.GetMeAsync();
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return Ok(result.Value);
+    }
 }

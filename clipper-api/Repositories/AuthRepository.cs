@@ -242,27 +242,16 @@ public class AuthRepository(
 
         authClaims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-        if (user.BarberShopId.HasValue)
-            authClaims.Add(new Claim("BarberShopId", user.BarberShopId.Value.ToString()));
+        var (barberShopId, barberId, customerId) = await ResolveUserContextAsync(user);
 
-        var barber = await context.Barbers
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .FirstOrDefaultAsync(b => b.ApplicationUserId == user.Id);
-        if (barber != null)
-        {
-            authClaims.Add(new Claim("BarberId", barber.Id.ToString()));
-            if (!user.BarberShopId.HasValue && barber.BarberShopId.HasValue)
-                authClaims.Add(new Claim("BarberShopId", barber.BarberShopId.Value.ToString()));
-        }
+        if (barberShopId.HasValue)
+            authClaims.Add(new Claim("BarberShopId", barberShopId.Value.ToString()));
 
-        var customer = await context.Clients
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
-        if (customer != null)
-        {
-            authClaims.Add(new Claim("CustomerId", customer.Id.ToString()));
-        }
+        if (barberId.HasValue)
+            authClaims.Add(new Claim("BarberId", barberId.Value.ToString()));
+
+        if (customerId.HasValue)
+            authClaims.Add(new Claim("CustomerId", customerId.Value.ToString()));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -324,5 +313,49 @@ public class AuthRepository(
             await userManager.DeleteAsync(user);
             return false;
         }
+    }
+
+    public async Task<CurrentUserDto?> GetCurrentUserAsync(string userId)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null)
+            return null;
+
+        var roles = (await userManager.GetRolesAsync(user)).ToList();
+        var (barberShopId, barberId, customerId) = await ResolveUserContextAsync(user);
+
+        return new CurrentUserDto
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Email = user.Email ?? string.Empty,
+            PhoneNumber = user.PhoneNumber,
+            Role = roles.FirstOrDefault() ?? string.Empty,
+            Roles = roles,
+            StateAccount = user.StateAccount.ToString(),
+            BarberShopId = barberShopId,
+            BarberId = barberId,
+            CustomerId = customerId
+        };
+    }
+
+    private async Task<(int? BarberShopId, int? BarberId, int? CustomerId)> ResolveUserContextAsync(ApplicationUser user)
+    {
+        var barberShopId = user.BarberShopId;
+
+        var barber = await context.Barbers
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == user.Id);
+
+        int? barberId = barber?.Id;
+        if (!barberShopId.HasValue && barber?.BarberShopId != null)
+            barberShopId = barber.BarberShopId;
+
+        var customer = await context.Clients
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
+
+        return (barberShopId, barberId, customer?.Id);
     }
 }

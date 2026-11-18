@@ -235,4 +235,66 @@ public class Phase3FeaturesTests
         result.Value.TotalRevenue.Should().Be(300m);
         result.Value.AverageRating.Should().Be(4.8);
     }
+
+    [Fact]
+    public async Task GetMe_AuthenticatedUser_ShouldReturnCurrentUser()
+    {
+        // Arrange
+        _currentUserMock.Setup(u => u.GetUserId()).Returns("user-123");
+        _authRepoMock.Setup(r => r.GetCurrentUserAsync("user-123"))
+            .ReturnsAsync(new CurrentUserDto
+            {
+                Id = "user-123",
+                FullName = "João Silva",
+                Email = "joao@clipper.com",
+                PhoneNumber = "11999999999",
+                Role = UserRoles.Customer,
+                Roles = [UserRoles.Customer],
+                StateAccount = "Active",
+                CustomerId = 42
+            });
+
+        var sut = CreateAuthService();
+
+        // Act
+        var result = await sut.GetMeAsync();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Id.Should().Be("user-123");
+        result.Value.Role.Should().Be(UserRoles.Customer);
+        result.Value.CustomerId.Should().Be(42);
+    }
+
+    [Fact]
+    public async Task GetMe_UnauthenticatedUser_ShouldReturnUnauthorized()
+    {
+        // Arrange
+        _currentUserMock.Setup(u => u.GetUserId()).Returns((string?)null);
+        var sut = CreateAuthService();
+
+        // Act
+        var result = await sut.GetMeAsync();
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Type.Should().Be(ErrorType.Unauthorized);
+    }
+
+    [Fact]
+    public async Task GetMe_UserNotFound_ShouldReturnNotFound()
+    {
+        // Arrange
+        _currentUserMock.Setup(u => u.GetUserId()).Returns("missing-user");
+        _authRepoMock.Setup(r => r.GetCurrentUserAsync("missing-user"))
+            .ReturnsAsync((CurrentUserDto?)null);
+        var sut = CreateAuthService();
+
+        // Act
+        var result = await sut.GetMeAsync();
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Type.Should().Be(ErrorType.NotFound);
+    }
 }
