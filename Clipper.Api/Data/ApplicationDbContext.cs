@@ -6,11 +6,13 @@ using Microsoft.EntityFrameworkCore;
 namespace Clipper.Api.Data;
 
 public class ApplicationDbContext(
-    DbContextOptions<ApplicationDbContext> options
-    //ICurrentUserService currentUserService
+    DbContextOptions<ApplicationDbContext> options,
+    ICurrentUserService? currentUserService = null
 )
     : IdentityDbContext<ApplicationUser>(options)
 {
+    public int? CurrentBarberShopId => currentUserService?.GetBarberShopId();
+
     public DbSet<BarberShop> BarberShops { get; set; }
     public DbSet<Barber> Barbers { get; set; }
     public DbSet<Customer> Clients { get; set; }
@@ -18,25 +20,32 @@ public class ApplicationDbContext(
     public DbSet<Service> Services { get; set; }
     public DbSet<BarberSchedule> BarberSchedules { get; set; }
     public DbSet<TimeBlock> TimeBlocks { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Review> Reviews { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        // Example of a global query filter (uncomment and implement _currentBarberShopId as needed)
-        // builder.Entity<BarberShop>().HasQueryFilter(b => b.Id == _currentBarberShopId);
+        // Multi-tenant global query filters for BarberShop-scoped users (BarberShopOwner / Barber).
+        // Customers, Admins, and anonymous visitors have CurrentBarberShopId == null, allowing catalog discovery.
+        builder.Entity<Barber>()
+            .HasQueryFilter(x => !CurrentBarberShopId.HasValue || x.BarberShopId == CurrentBarberShopId.Value);
 
-        // builder.Entity<BarberShop>()
-        //     .HasQueryFilter(b => !currentUserService.GetBarberShopId().HasValue 
-        //                          || b.Id == currentUserService.GetBarberShopId()!.Value);
-        //
-        // builder.Entity<Barber>()
-        //     .HasQueryFilter(x => !currentUserService.GetBarberShopId().HasValue 
-        //                          || x.BarberShopId == currentUserService.GetBarberShopId()!.Value);
-        //
-        // builder.Entity<Appointment>()
-        //     .HasQueryFilter(x => !currentUserService.GetBarberShopId().HasValue 
-        //                          || x.BarberShopId == currentUserService.GetBarberShopId()!.Value);
+        builder.Entity<BarberSchedule>()
+            .HasQueryFilter(x => !CurrentBarberShopId.HasValue || x.Barber.BarberShopId == CurrentBarberShopId.Value);
+
+        builder.Entity<TimeBlock>()
+            .HasQueryFilter(x => !CurrentBarberShopId.HasValue || x.Barber.BarberShopId == CurrentBarberShopId.Value);
+
+        builder.Entity<Service>()
+            .HasQueryFilter(x => !CurrentBarberShopId.HasValue || x.BarberShopId == CurrentBarberShopId.Value);
+
+        builder.Entity<Appointment>()
+            .HasQueryFilter(x => !CurrentBarberShopId.HasValue || x.BarberShopId == CurrentBarberShopId.Value);
+
+        builder.Entity<Review>()
+            .HasQueryFilter(x => !CurrentBarberShopId.HasValue || x.BarberShopId == CurrentBarberShopId.Value);
 
         // Configuration for BarberShop entity
         builder.Entity<BarberShop>(entity =>
@@ -123,6 +132,42 @@ public class ApplicationDbContext(
                 .WithOne(a => a.Customer)
                 .HasForeignKey(a => a.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a customer if they have appointments
+        });
+
+        // Configuration for RefreshToken entity
+        builder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasIndex(rt => rt.Token).IsUnique();
+            entity.HasOne(rt => rt.ApplicationUser)
+                .WithMany()
+                .HasForeignKey(rt => rt.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configuration for Review entity
+        builder.Entity<Review>(entity =>
+        {
+            entity.HasIndex(r => r.AppointmentId).IsUnique();
+
+            entity.HasOne(r => r.Appointment)
+                .WithMany()
+                .HasForeignKey(r => r.AppointmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(r => r.Customer)
+                .WithMany()
+                .HasForeignKey(r => r.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(r => r.Barber)
+                .WithMany(b => b.Reviews)
+                .HasForeignKey(r => r.BarberId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(r => r.BarberShop)
+                .WithMany(bs => bs.Reviews)
+                .HasForeignKey(r => r.BarberShopId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

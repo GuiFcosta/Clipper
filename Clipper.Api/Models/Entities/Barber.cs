@@ -36,4 +36,7 @@ public class Barber
     
     // List of appointments for the barber
     public ICollection<Appointment>? Appointments { get; set; } = new List<Appointment>();
+
+    // List of reviews for the barber
+    public ICollection<Review>? Reviews { get; set; } = new List<Review>();
 }

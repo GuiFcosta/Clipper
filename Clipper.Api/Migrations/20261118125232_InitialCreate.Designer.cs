@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Clipper.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261116164120_InitialCreate")]
+    [Migration("20261118125232_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -294,6 +294,91 @@ namespace Clipper.Api.Migrations
                     b.ToTable("Clients");
                 });
 
+            modelBuilder.Entity("Clipper.Api.Models.Entities.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReplacedByToken")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("RevokedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("Clipper.Api.Models.Entities.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AppointmentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BarberId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BarberShopId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId")
+                        .IsUnique();
+
+                    b.HasIndex("BarberId");
+
+                    b.HasIndex("BarberShopId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Reviews");
+                });
+
             modelBuilder.Entity("Clipper.Api.Models.Entities.Service", b =>
                 {
                     b.Property<int>("Id")
@@ -568,6 +653,52 @@ namespace Clipper.Api.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
+            modelBuilder.Entity("Clipper.Api.Models.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("Clipper.Api.Models.Entities.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("Clipper.Api.Models.Entities.Review", b =>
+                {
+                    b.HasOne("Clipper.Api.Models.Entities.Appointment", "Appointment")
+                        .WithMany()
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Clipper.Api.Models.Entities.Barber", "Barber")
+                        .WithMany("Reviews")
+                        .HasForeignKey("BarberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Clipper.Api.Models.Entities.BarberShop", "BarberShop")
+                        .WithMany("Reviews")
+                        .HasForeignKey("BarberShopId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Clipper.Api.Models.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("Barber");
+
+                    b.Navigation("BarberShop");
+
+                    b.Navigation("Customer");
+                });
+
             modelBuilder.Entity("Clipper.Api.Models.Entities.Service", b =>
                 {
                     b.HasOne("Clipper.Api.Models.Entities.BarberShop", "BarberShop")
@@ -647,12 +778,16 @@ namespace Clipper.Api.Migrations
 
                     b.Navigation("BarberSchedule");
 
+                    b.Navigation("Reviews");
+
                     b.Navigation("TimeBlocks");
                 });
 
             modelBuilder.Entity("Clipper.Api.Models.Entities.BarberShop", b =>
                 {
                     b.Navigation("Barbers");
+
+                    b.Navigation("Reviews");
 
                     b.Navigation("Services");
                 });

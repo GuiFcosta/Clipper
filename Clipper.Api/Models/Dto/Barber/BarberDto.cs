@@ -9,4 +9,6 @@ public class BarberDto
     public string Nif { get; set; } = null!;
     public string Address { get; set; } = null!;
     public int? BarberShopId { get; set; }
+    public double AverageRating { get; set; }
+    public int TotalReviews { get; set; }
 }

@@ -199,6 +199,30 @@ namespace Clipper.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Token = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "character varying(450)", maxLength: 450, nullable: false),
+                    ExpiresAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    RevokedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ReplacedByToken = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Barbers",
                 columns: table => new
                 {
@@ -342,6 +366,49 @@ namespace Clipper.Api.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Reviews",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    AppointmentId = table.Column<int>(type: "integer", nullable: false),
+                    CustomerId = table.Column<int>(type: "integer", nullable: false),
+                    BarberId = table.Column<int>(type: "integer", nullable: false),
+                    BarberShopId = table.Column<int>(type: "integer", nullable: false),
+                    Rating = table.Column<int>(type: "integer", nullable: false),
+                    Comment = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reviews", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Appointments_AppointmentId",
+                        column: x => x.AppointmentId,
+                        principalTable: "Appointments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Reviews_BarberShops_BarberShopId",
+                        column: x => x.BarberShopId,
+                        principalTable: "BarberShops",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Barbers_BarberId",
+                        column: x => x.BarberId,
+                        principalTable: "Barbers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Clients_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Clients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_BarberId",
                 table: "Appointments",
@@ -420,6 +487,38 @@ namespace Clipper.Api.Migrations
                 column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_ApplicationUserId",
+                table: "RefreshTokens",
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_Token",
+                table: "RefreshTokens",
+                column: "Token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_AppointmentId",
+                table: "Reviews",
+                column: "AppointmentId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_BarberId",
+                table: "Reviews",
+                column: "BarberId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_BarberShopId",
+                table: "Reviews",
+                column: "BarberShopId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_CustomerId",
+                table: "Reviews",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Services_BarberShopId",
                 table: "Services",
                 column: "BarberShopId");
@@ -433,9 +532,6 @@ namespace Clipper.Api.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Appointments");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -455,19 +551,28 @@ namespace Clipper.Api.Migrations
                 name: "BarberSchedules");
 
             migrationBuilder.DropTable(
+                name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "Reviews");
+
+            migrationBuilder.DropTable(
                 name: "TimeBlocks");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Appointments");
+
+            migrationBuilder.DropTable(
+                name: "Barbers");
 
             migrationBuilder.DropTable(
                 name: "Clients");
 
             migrationBuilder.DropTable(
                 name: "Services");
-
-            migrationBuilder.DropTable(
-                name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
-                name: "Barbers");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

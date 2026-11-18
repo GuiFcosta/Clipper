@@ -21,4 +21,7 @@ public class BarberShop
     
     // List of services offered by the barber shop
     public ICollection<Service>? Services { get; set; } = new List<Service>();
+
+    // List of reviews for the barber shop
+    public ICollection<Review>? Reviews { get; set; } = new List<Review>();
 }

@@ -8,4 +8,6 @@ public class BarberShopDto
     public string PhoneNumber { get; set; } = null!;
     public string Email { get; set; } = null!;
     public ICollection<int>? BarbersIds { get; set; } = new List<int>();
+    public double AverageRating { get; set; }
+    public int TotalReviews { get; set; }
 }
