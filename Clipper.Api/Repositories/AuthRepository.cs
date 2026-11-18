@@ -1,11 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Clipper.Api.Constants;
 using Clipper.Api.Data;
 using Clipper.Api.Interfaces;
 using Clipper.Api.Models.Dto.Auth;
 using Clipper.Api.Models.Entities;
+using Clipper.Api.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,60 +20,29 @@ public class AuthRepository(
     RoleManager<IdentityRole> roleManager,
     ApplicationDbContext context) : IAuthRepository
 {
+    private const int AccessTokenExpirationHours = 1;
+    private const int RefreshTokenExpirationDays = 7;
+
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
     {
-        if (dto.Role != UserRoles.Barber && dto.Role != UserRoles.Customer && dto.Role != UserRoles.BarberShopOwner)
+        if (dto.Role == UserRoles.Barber)
         {
             return new AuthResponseDto
             {
                 IsSuccess = false,
-                Message = "Invalid role. Role must be either 'Barber', 'Customer', or 'BarberShopOwner'."
+                Message = "Barbers cannot self-register. A BarberShopOwner or Admin must register barbers via /api/barber."
             };
         }
 
-        // Validação de campos obrigatórios por role
-        if (dto.Role == UserRoles.Barber)
+        if (dto.Role != UserRoles.Customer && dto.Role != UserRoles.BarberShopOwner)
         {
-            if (string.IsNullOrWhiteSpace(dto.Nif))
+            return new AuthResponseDto
             {
-                return new AuthResponseDto
-                {
-                    IsSuccess = false,
-                    Message = "Nif is required for Barber role."
-                };
-            }
-
-            if (string.IsNullOrWhiteSpace(dto.Address))
-            {
-                return new AuthResponseDto
-                {
-                    IsSuccess = false,
-                    Message = "Address is required for Barber role."
-                };
-            }
-
-            if (!dto.BarberShopId.HasValue)
-            {
-                return new AuthResponseDto
-                {
-                    IsSuccess = false,
-                    Message = "BarberShopId is required for Barber role. The barber must be assigned to a BarberShop."
-                };
-            }
-
-            // Validar se a BarberShop existe
-            var barberShopExists = await context.BarberShops.AnyAsync(bs => bs.Id == dto.BarberShopId.Value);
-            if (!barberShopExists)
-            {
-                return new AuthResponseDto
-                {
-                    IsSuccess = false,
-                    Message = $"BarberShop with Id {dto.BarberShopId.Value} does not exist."
-                };
-            }
+                IsSuccess = false,
+                Message = "Invalid role. Self-registration is allowed only for 'Customer' or 'BarberShopOwner'."
+            };
         }
 
-        // Validação de PhoneNumber
         if (string.IsNullOrWhiteSpace(dto.PhoneNumber))
         {
             return new AuthResponseDto
@@ -87,8 +58,9 @@ public class AuthRepository(
             UserName = dto.Email,
             Email = dto.Email,
             PhoneNumber = dto.PhoneNumber,
-            BarberShopId = dto.BarberShopId
+            StateAccount = StateAccount.Active
         };
+
         var result = await userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
         {
@@ -99,7 +71,6 @@ public class AuthRepository(
             };
         }
 
-        // Garante que a role existe antes de atribuir
         if (!await roleManager.RoleExistsAsync(dto.Role))
         {
             await roleManager.CreateAsync(new IdentityRole(dto.Role));
@@ -135,42 +106,170 @@ public class AuthRepository(
             };
         }
 
-        var token = await GenerateJwtToken(user);
+        if (user.StateAccount == StateAccount.Pending)
+        {
+            return new AuthResponseDto
+            {
+                IsSuccess = false,
+                Message = "Your account is pending approval."
+            };
+        }
+
+        if (user.StateAccount == StateAccount.Suspended)
+        {
+            return new AuthResponseDto
+            {
+                IsSuccess = false,
+                Message = "Your account has been suspended."
+            };
+        }
+
+        var expiresAtUtc = DateTime.UtcNow.AddHours(AccessTokenExpirationHours);
+        var token = await GenerateJwtToken(user, expiresAtUtc);
+        var refreshToken = await CreateRefreshTokenAsync(user.Id);
+
         return new AuthResponseDto
         {
             IsSuccess = true,
             Message = "Login successful.",
-            Token = token
+            Token = token,
+            RefreshToken = refreshToken.Token,
+            ExpiresAtUtc = expiresAtUtc
         };
     }
 
-    private async Task<string> GenerateJwtToken(ApplicationUser user)
+    public async Task<AuthResponseDto> RefreshTokenAsync(string refreshTokenValue)
+    {
+        if (string.IsNullOrWhiteSpace(refreshTokenValue))
+        {
+            return new AuthResponseDto
+            {
+                IsSuccess = false,
+                Message = "Refresh token is required."
+            };
+        }
+
+        var storedToken = await context.RefreshTokens
+            .Include(rt => rt.ApplicationUser)
+            .FirstOrDefaultAsync(rt => rt.Token == refreshTokenValue);
+
+        if (storedToken == null || !storedToken.IsActive)
+        {
+            return new AuthResponseDto
+            {
+                IsSuccess = false,
+                Message = "Invalid or expired refresh token."
+            };
+        }
+
+        var user = storedToken.ApplicationUser;
+        if (user.StateAccount != StateAccount.Active)
+        {
+            return new AuthResponseDto
+            {
+                IsSuccess = false,
+                Message = "Your account is not active."
+            };
+        }
+
+        // Rotate refresh token
+        var newRefreshToken = GenerateRefreshTokenEntity(user.Id);
+        storedToken.RevokedAtUtc = DateTime.UtcNow;
+        storedToken.ReplacedByToken = newRefreshToken.Token;
+
+        context.RefreshTokens.Add(newRefreshToken);
+        await context.SaveChangesAsync();
+
+        var expiresAtUtc = DateTime.UtcNow.AddHours(AccessTokenExpirationHours);
+        var newJwt = await GenerateJwtToken(user, expiresAtUtc);
+
+        return new AuthResponseDto
+        {
+            IsSuccess = true,
+            Message = "Token refreshed successfully.",
+            Token = newJwt,
+            RefreshToken = newRefreshToken.Token,
+            ExpiresAtUtc = expiresAtUtc
+        };
+    }
+
+    public async Task<bool> RevokeTokenAsync(string refreshTokenValue, string? currentUserId, bool isAdmin)
+    {
+        var storedToken = await context.RefreshTokens
+            .FirstOrDefaultAsync(rt => rt.Token == refreshTokenValue);
+
+        if (storedToken == null || !storedToken.IsActive)
+            return false;
+
+        if (!isAdmin && storedToken.ApplicationUserId != currentUserId)
+            return false;
+
+        storedToken.RevokedAtUtc = DateTime.UtcNow;
+        await context.SaveChangesAsync();
+        return true;
+    }
+
+    private async Task<RefreshToken> CreateRefreshTokenAsync(string userId)
+    {
+        var refreshToken = GenerateRefreshTokenEntity(userId);
+        context.RefreshTokens.Add(refreshToken);
+        await context.SaveChangesAsync();
+        return refreshToken;
+    }
+
+    private static RefreshToken GenerateRefreshTokenEntity(string userId)
+    {
+        var randomBytes = RandomNumberGenerator.GetBytes(64);
+        return new RefreshToken
+        {
+            Token = Convert.ToBase64String(randomBytes),
+            ApplicationUserId = userId,
+            CreatedAtUtc = DateTime.UtcNow,
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(RefreshTokenExpirationDays)
+        };
+    }
+
+    private async Task<string> GenerateJwtToken(ApplicationUser user, DateTime expiresAtUtc)
     {
         var roles = await userManager.GetRolesAsync(user);
         var authClaims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Email, user.Email!),
-            new Claim(ClaimTypes.Name, user.UserName!),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new(ClaimTypes.NameIdentifier, user.Id),
+            new(ClaimTypes.Email, user.Email!),
+            new(ClaimTypes.Name, user.UserName!),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        // foreach (var role in roles)
-        // {
-        //     authClaims.Add(new Claim(ClaimTypes.Role, role));
-        // }
-
-        authClaims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role))); // LINQ 
+        authClaims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         if (user.BarberShopId.HasValue)
             authClaims.Add(new Claim("BarberShopId", user.BarberShopId.Value.ToString()));
+
+        var barber = await context.Barbers
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == user.Id);
+        if (barber != null)
+        {
+            authClaims.Add(new Claim("BarberId", barber.Id.ToString()));
+            if (!user.BarberShopId.HasValue && barber.BarberShopId.HasValue)
+                authClaims.Add(new Claim("BarberShopId", barber.BarberShopId.Value.ToString()));
+        }
+
+        var customer = await context.Clients
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
+        if (customer != null)
+        {
+            authClaims.Add(new Claim("CustomerId", customer.Id.ToString()));
+        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             claims: authClaims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: expiresAtUtc,
             signingCredentials: credentials,
             issuer: configuration["Jwt:Issuer"],
             audience: configuration["Jwt:Audience"]
@@ -185,20 +284,6 @@ public class AuthRepository(
         {
             switch (dto.Role)
             {
-                case UserRoles.Barber:
-                    var barber = new Barber
-                    {
-                        ApplicationUserId = user.Id,
-                        Name = user.FullName,
-                        PhoneNumber = user.PhoneNumber ?? dto.PhoneNumber,
-                        Email = user.Email!,
-                        Nif = dto.Nif!,
-                        Address = dto.Address!,
-                        BarberShopId = dto.BarberShopId!.Value
-                    };
-                    context.Barbers.Add(barber);
-                    break;
-                    
                 case UserRoles.Customer:
                     var customer = new Customer
                     {
@@ -206,22 +291,25 @@ public class AuthRepository(
                         Name = user.FullName,
                         PhoneNumber = user.PhoneNumber ?? dto.PhoneNumber,
                         Email = user.Email!
-                        // ApplicationUser = user
                     };
                     context.Clients.Add(customer);
                     break;
-                    
+
                 case UserRoles.BarberShopOwner:
                     var newShop = new BarberShop
                     {
-                        Name = dto.BarberShopName ?? $"{user.FullName}'s Barber Shop",
-                        Address = dto.BarberShopAddress ?? "Edit the address",
-                        PhoneNumber = "Edit the phone number",
-                        Email = "Edit the email",
+                        Name = !string.IsNullOrWhiteSpace(dto.BarberShopName)
+                            ? dto.BarberShopName
+                            : $"{user.FullName}'s Barber Shop",
+                        Address = !string.IsNullOrWhiteSpace(dto.BarberShopAddress)
+                            ? dto.BarberShopAddress
+                            : "Edit the address",
+                        PhoneNumber = user.PhoneNumber ?? dto.PhoneNumber,
+                        Email = user.Email!,
                         Barbers = new List<Barber>()
                     };
                     context.BarberShops.Add(newShop);
-                    await context.SaveChangesAsync(); // Save to generate the Id for the new shop
+                    await context.SaveChangesAsync();
 
                     user.BarberShopId = newShop.Id;
                     await userManager.UpdateAsync(user);
@@ -231,10 +319,9 @@ public class AuthRepository(
             await context.SaveChangesAsync();
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             await userManager.DeleteAsync(user);
-            Console.WriteLine($"Error registering user: {ex.Message}");
             return false;
         }
     }

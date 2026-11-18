@@ -1,4 +1,5 @@
 using System.Text;
+using Clipper.Api.Common;
 using Clipper.Api.Data;
 using Clipper.Api.Interfaces;
 using Clipper.Api.Models.Entities;
@@ -13,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -51,6 +54,17 @@ builder.Services.AddOpenApi();
 // Dependency Injection for Services
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBarberShopService, BarberShopService>();
+builder.Services.AddScoped<IBarberService, BarberService>();
+builder.Services.AddScoped<IServiceCatalogService, ServiceCatalogService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<ITimeBlockService, TimeBlockService>();
+builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
+builder.Services.AddScoped<AvailabilityService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 // Dependency Injection for Repositories
 builder.Services.AddScoped<IBarberShopRepository, BarberShopRepository>();
@@ -61,7 +75,8 @@ builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
-builder.Services.AddScoped<AvailabilityService>();
+builder.Services.AddScoped<ITimeBlockRepository, TimeBlockRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 // Configure Identity with ApplicationUser and IdentityRole
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -124,6 +139,7 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseExceptionHandler();
 app.UseCors("AllowReactApp");
 
 app.UseAuthentication();

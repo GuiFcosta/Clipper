@@ -11,20 +11,34 @@ public class BarberRepository(ApplicationDbContext context) : IBarberRepository
     {
         return await context.Barbers
             .Include(b => b.BarberShop)
+            .Include(b => b.Reviews)
             .ToListAsync();
     }
+
     public async Task<IEnumerable<Barber>> GetAllBarbersFromBarberShop(int barberShopId)
     {
         return await context.Barbers
+            .IgnoreQueryFilters()
             .Where(b => b.BarberShopId == barberShopId)
             .Include(b => b.BarberShop)
+            .Include(b => b.Reviews)
             .ToListAsync();
     }
+
     public async Task<Barber?> GetBarberById(int id)
     {
         return await context.Barbers
+            .IgnoreQueryFilters()
             .Include(b => b.BarberShop)
+            .Include(b => b.Reviews)
             .FirstOrDefaultAsync(b => b.Id == id);
+    }
+
+    public async Task<Barber?> GetBarberByUserId(string applicationUserId)
+    {
+        return await context.Barbers
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == applicationUserId);
     }
 
     public Task CreateBarber(Barber barber)
@@ -32,6 +46,7 @@ public class BarberRepository(ApplicationDbContext context) : IBarberRepository
         context.Barbers.Add(barber);
         return context.SaveChangesAsync();
     }
+
     public async Task UpdateBarber(Barber barber)
     {
         context.Barbers.Update(barber);

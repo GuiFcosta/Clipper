@@ -1,30 +1,56 @@
-using Clipper.Api.Interfaces;
+using Clipper.Api.Common;
 using Clipper.Api.Models.Dto.Auth;
+using Clipper.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clipper.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IAuthRepository repository) : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
-    // POST: api/auth/register
+    [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<ActionResult> Register([FromBody] RegisterDto registerDto)
+    public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto registerDto)
     {
-        var userToRegister = await repository.RegisterAsync(registerDto);
-        if (!userToRegister.IsSuccess)
-            return BadRequest(userToRegister);
-        return Ok(userToRegister);
+        var result = await authService.RegisterAsync(registerDto);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return Ok(result.Value);
     }
 
-    // POST: api/auth/login
+    [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
+    public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto loginDto)
     {
-        var userToLogin = await repository.LoginAsync(loginDto);
-        if (!userToLogin.IsSuccess)            
-            return Unauthorized(userToLogin);
-        return Ok(userToLogin);
+        var result = await authService.LoginAsync(loginDto);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return Ok(result.Value);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto dto)
+    {
+        var result = await authService.RefreshTokenAsync(dto);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return Ok(result.Value);
+    }
+
+    [Authorize]
+    [HttpPost("revoke")]
+    public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenRequestDto dto)
+    {
+        var result = await authService.RevokeTokenAsync(dto);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return NoContent();
     }
 }

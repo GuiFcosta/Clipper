@@ -1,114 +1,79 @@
-using Clipper.Api.Interfaces;
+using Clipper.Api.Common;
+using Clipper.Api.Constants;
 using Clipper.Api.Models.Dto.Barber;
-using Clipper.Api.Models.Entities;
+using Clipper.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clipper.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class BarberController(IBarberRepository repository) : ControllerBase
+public class BarberController(IBarberService service) : ControllerBase
 {
-    // GET: api/barber
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BarberDto>>> GetAllBarbers()
     {
-        var barbers = await repository.GetAllBarbers();
-        var response = barbers.Select(barber => new BarberDto
-        {
-            Id = barber.Id,
-            Name = barber.Name,
-            Email = barber.Email,
-            PhoneNumber = barber.PhoneNumber,
-            Nif = barber.Nif,
-            Address = barber.Address,
-            BarberShopId = barber.BarberShopId
-        }).ToList();
-        return Ok(response);
+        var result = await service.GetAllAsync();
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return Ok(result.Value);
     }
-    
-    // GET: api/barber/shop/{barberShopId}
-    [HttpGet("shop/{barberShopId}")]
+
+    [AllowAnonymous]
+    [HttpGet("shop/{barberShopId:int}")]
     public async Task<ActionResult<IEnumerable<BarberDto>>> GetAllBarbersFromBarberShop(int barberShopId)
     {
-        var barbers = await repository.GetAllBarbersFromBarberShop(barberShopId);
-        var response = barbers.Select(barber => new BarberDto
-        {
-            Id = barber.Id,
-            Name = barber.Name,
-            Email = barber.Email,
-            PhoneNumber = barber.PhoneNumber,
-            Nif = barber.Nif,
-            Address = barber.Address,
-            BarberShopId = barber.BarberShopId
-        }).ToList();
-        return Ok(response);
+        var result = await service.GetByBarberShopAsync(barberShopId);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return Ok(result.Value);
     }
-    
-    // GET: api/barber/{id}
-    [HttpGet("{id}")]
+
+    [AllowAnonymous]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<BarberDto>> GetBarberById(int id)
     {
-        var barber = await repository.GetBarberById(id);
-        if (barber == null)
-            return NotFound();
-        var response = new BarberDto
-        {
-            Id = barber.Id,
-            Name = barber.Name,
-            Email = barber.Email,
-            PhoneNumber = barber.PhoneNumber,
-            Nif = barber.Nif,
-            Address = barber.Address,
-            BarberShopId = barber.BarberShopId
-        };
-        return Ok(response);
+        var result = await service.GetByIdAsync(id);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return Ok(result.Value);
     }
-    
-    // POST: api/barber
+
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.BarberShopOwner}")]
     [HttpPost]
-    public async Task<ActionResult> CreateBarber([FromBody] BarberCreateDto barber)
+    public async Task<ActionResult<BarberDto>> CreateBarber([FromBody] BarberCreateDto barber)
     {
-        var newBarber = new Barber
-        {
-            Name = barber.Name,
-            Email = barber.Email,
-            PhoneNumber = barber.PhoneNumber,
-            Nif = barber.Nif,
-            Address = barber.Address,
-            BarberShopId = barber.BarberShopId
-        };
-        await repository.CreateBarber(newBarber);
-        return CreatedAtAction(nameof(GetBarberById), new { id = newBarber.Id }, newBarber);
+        var result = await service.CreateAsync(barber);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return CreatedAtAction(nameof(GetBarberById), new { id = result.Value.Id }, result.Value);
     }
-    
-    // PUT: api/barber/{id}
-    [HttpPut("{id}")]
+
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.BarberShopOwner},{UserRoles.Barber}")]
+    [HttpPut("{id:int}")]
     public async Task<ActionResult> UpdateBarber(int id, [FromBody] BarberDto barber)
     {
-        if (id != barber.Id)
-            return BadRequest();
-        
-        var barberToUpdate = await repository.GetBarberById(id);
-        if (barberToUpdate == null)
-            return NotFound();
-        
-        barberToUpdate.Name = barber.Name;
-        barberToUpdate.Email = barber.Email;
-        barberToUpdate.PhoneNumber = barber.PhoneNumber;
-        barberToUpdate.Nif = barber.Nif;
-        barberToUpdate.Address = barber.Address;
-        barberToUpdate.BarberShopId = barber.BarberShopId;
-        
-        await repository.UpdateBarber(barberToUpdate);
+        var result = await service.UpdateAsync(id, barber);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
         return NoContent();
     }
-    
-    // DELETE: api/barber/{id}
-    [HttpDelete("{id}")]
+
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.BarberShopOwner}")]
+    [HttpDelete("{id:int}")]
     public async Task<ActionResult> DeleteBarber(int id)
     {
-        await repository.DeleteBarber(id);
+        var result = await service.DeleteAsync(id);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
         return NoContent();
     }
 }

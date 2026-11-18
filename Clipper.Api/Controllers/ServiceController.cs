@@ -1,54 +1,72 @@
-using Clipper.Api.Interfaces;
-using Clipper.Api.Models.Entities;
+using Clipper.Api.Common;
+using Clipper.Api.Constants;
+using Clipper.Api.Models.Dto.Service;
+using Clipper.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Clipper.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ServiceController(IServiceRepository repository) : ControllerBase
+public class ServiceController(IServiceCatalogService serviceCatalog) : ControllerBase
 {
-    // GET: api/service
+    [AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Service>>> GetAllServices()
+    public async Task<ActionResult<PagedResult<ServiceDto>>> GetAllServices(
+        [FromQuery] PaginationParams pagination,
+        [FromQuery] int? barberShopId = null,
+        [FromQuery] bool? isActive = null,
+        [FromQuery] string? search = null)
     {
-        var services = await repository.GetAllServices();
-        return Ok(services);
+        var result = await serviceCatalog.GetPagedAsync(pagination.Page, pagination.PageSize, barberShopId, isActive, search);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return Ok(result.Value);
     }
 
-    // GET: api/service/{id}
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Service>> GetServiceById(int id)
+    [AllowAnonymous]
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<ServiceDto>> GetServiceById(int id)
     {
-        var service = await repository.GetServiceById(id);
-        if (service == null)
-            return NotFound();
-        return Ok(service);
+        var result = await serviceCatalog.GetByIdAsync(id);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return Ok(result.Value);
     }
 
-    // POST: api/service
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.BarberShopOwner}")]
     [HttpPost]
-    public async Task<ActionResult> CreateService([FromBody] Service service)
+    public async Task<ActionResult<ServiceDto>> CreateService([FromBody] ServiceCreateDto dto)
     {
-        await repository.CreateService(service);
-        return CreatedAtAction(nameof(GetServiceById), new { id = service.Id }, service);
+        var result = await serviceCatalog.CreateAsync(dto);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
+        return CreatedAtAction(nameof(GetServiceById), new { id = result.Value.Id }, result.Value);
     }
 
-    // PUT: api/service/{id} 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateService(int id, [FromBody] Service service)
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.BarberShopOwner}")]
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateService(int id, [FromBody] ServiceDto dto)
     {
-        if (id != service.Id)
-            return BadRequest();
-        await repository.UpdateService(service);
+        var result = await serviceCatalog.UpdateAsync(id, dto);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
         return NoContent();
     }
 
-    // DELETE: api/service/{id}
-    [HttpDelete("{id}")]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.BarberShopOwner}")]
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteService(int id)
     {
-        await repository.DeleteService(id);
+        var result = await serviceCatalog.DeleteAsync(id);
+        if (result.IsFailure)
+            return result.ToProblemDetails(this);
+
         return NoContent();
     }
 }
