@@ -2,32 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { ApiError } from './lib/api';
-
-function HomePage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
-
-  return (
-    <main style={{ maxWidth: 720, margin: '3rem auto', padding: '0 1rem', fontFamily: 'system-ui, sans-serif' }}>
-      <h1>Clipper</h1>
-      <p>Barbershop Hub — Frontend React + Vite conectado à API.</p>
-
-      {isLoading ? (
-        <p>Verificando sessão...</p>
-      ) : isAuthenticated && user ? (
-        <div>
-          <p>
-            Logado como <strong>{user.fullName}</strong> ({user.role})
-          </p>
-          <Link to="/dashboard">Ir para o Dashboard</Link>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <Link to="/login">Entrar</Link>
-        </div>
-      )}
-    </main>
-  );
-}
+import { LandingPage } from './pages/LandingPage';
 
 function LoginPage() {
   const { login, isAuthenticated } = useAuth();
@@ -101,7 +76,7 @@ function DashboardPage() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
