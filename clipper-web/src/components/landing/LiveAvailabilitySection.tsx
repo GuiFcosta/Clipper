@@ -1,5 +1,6 @@
 import { ArrowRight, Star } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FILTER_CHIPS, PARTNER_BARBERSHOPS } from '../../data/mockLandingData';
 
 interface LiveAvailabilitySectionProps {
@@ -104,9 +105,12 @@ export function LiveAvailabilitySection({ onSelectSlot }: LiveAvailabilitySectio
                   </span>
                 </div>
 
-                <h3 className="font-headline font-bold text-lg text-on-surface uppercase tracking-tight">
+                <Link
+                  to={`/barbearia/${shop.id}`}
+                  className="block font-headline font-bold text-lg text-on-surface uppercase tracking-tight hover:text-primary transition-colors"
+                >
                   {shop.name}
-                </h3>
+                </Link>
                 <p className="font-mono text-xs text-slate-500 mt-0.5">{shop.address}</p>
 
                 {/* Ocupação e Indicador */}
@@ -174,16 +178,13 @@ export function LiveAvailabilitySection({ onSelectSlot }: LiveAvailabilitySectio
               </div>
 
               {/* Action Button */}
-              <button
-                type="button"
-                onClick={() =>
-                  handleSlotClick(shop.id, shop.name, chosenSlot ?? shop.slots[0]?.time ?? '15:15')
-                }
-                className="w-full mt-5 py-3 bg-on-surface text-white hover:bg-primary font-mono text-xs uppercase font-bold tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              <Link
+                to={`/barbearia/${shop.id}`}
+                className="w-full mt-5 py-3 bg-on-surface text-white hover:bg-primary font-mono text-xs uppercase font-bold tracking-wider transition-colors flex items-center justify-center gap-2"
               >
-                <span>{chosenSlot ? `Cadeira Travada (${chosenSlot})` : 'Travar Cadeira'}</span>
+                <span>{chosenSlot ? `Ver Grade (${chosenSlot})` : 'Travar Cadeira'}</span>
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </Link>
             </div>
           );
         })}
