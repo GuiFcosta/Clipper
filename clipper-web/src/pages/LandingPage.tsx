@@ -54,7 +54,7 @@ export function LandingPage() {
             <strong className="text-primary">{slotToast.time}</strong> reservado temporariamente na grade.
           </p>
           <Link
-            to="/login"
+            to="/checkout"
             className="block w-full py-2.5 px-4 bg-primary hover:bg-[#e04400] text-white text-center font-mono text-xs font-bold uppercase tracking-wider transition-colors"
           >
             Confirmar Reserva (15s) ↗
