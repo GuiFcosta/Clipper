@@ -1,58 +1,11 @@
-import { useState, type FormEvent } from 'react';
-import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { ApiError } from './lib/api';
+import { BarbershopDetailPage } from './pages/BarbershopDetailPage';
+import { CheckoutPage } from './pages/CheckoutPage';
 import { LandingPage } from './pages/LandingPage';
-
-function LoginPage() {
-  const { login, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setSubmitting(true);
-    try {
-      await login({ email, password });
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erro ao autenticar.');
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <main style={{ maxWidth: 400, margin: '3rem auto', padding: '0 1rem', fontFamily: 'system-ui, sans-serif' }}>
-      <h1>Entrar no Clipper</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          Email
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          Senha
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </label>
-        {error && <p style={{ color: '#dc2626', margin: 0 }}>{error}</p>}
-        <button type="submit" disabled={submitting}>
-          {submitting ? 'Entrando...' : 'Entrar'}
-        </button>
-      </form>
-      <p style={{ marginTop: '1rem' }}>
-        <Link to="/">Voltar</Link>
-      </p>
-    </main>
-  );
-}
+import { LoginPage } from './pages/LoginPage';
+import { RadarPage } from './pages/RadarPage';
+import { RegisterPage } from './pages/RegisterPage';
 
 function DashboardPage() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
@@ -77,7 +30,11 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/radar" element={<RadarPage />} />
+      <Route path="/barbearia/:id" element={<BarbershopDetailPage />} />
+      <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

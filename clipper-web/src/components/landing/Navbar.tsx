@@ -22,12 +22,12 @@ export function Navbar() {
         </div>
 
         <nav className="hidden lg:flex items-stretch flex-1">
-          <a
-            href="#radar"
-            className="flex items-center px-6 text-xs uppercase tracking-wider font-mono border-r-[1.5px] border-outline transition-colors bg-surface-variant font-bold text-on-surface"
+          <Link
+            to="/radar"
+            className="flex items-center px-6 text-xs uppercase tracking-wider font-mono border-r-[1.5px] border-outline transition-colors bg-surface-variant font-bold text-on-surface hover:text-primary"
           >
             Radar Ao Vivo
-          </a>
+          </Link>
           <a
             href="#barbearias"
             className="flex items-center px-6 text-xs uppercase tracking-wider font-mono text-on-surface-variant hover:text-on-surface border-r-[1.5px] border-outline transition-colors"
