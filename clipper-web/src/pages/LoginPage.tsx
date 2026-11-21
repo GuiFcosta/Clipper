@@ -5,20 +5,29 @@ import { useAuth } from '../contexts/AuthContext';
 import { ApiError } from '../lib/api';
 
 export function LoginPage() {
-  const { login, isAuthenticated } = useAuth();
+  const { login, loginDemo, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const state = location.state as { from?: string } | null;
-  const redirectTo = state?.from ?? '/dashboard';
+  const redirectTo = state?.from ?? '/meus-agendamentos';
+  const isFromB2B = redirectTo.startsWith('/b2b');
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(
+    isFromB2B ? 'b2b.demo@clipper.app' : 'guilherme.demo@clipper.app',
+  );
+  const [password, setPassword] = useState('Clipper@2026');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   if (isAuthenticated) {
     return <Navigate to={redirectTo} replace />;
+  }
+
+  function handleDemoLogin(role: 'Customer' | 'BarberShopOwner') {
+    loginDemo(role);
+    const target = role === 'BarberShopOwner' ? '/b2b' : redirectTo;
+    navigate(target, { replace: true });
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -150,6 +159,29 @@ export function LoginPage() {
                 {submitting ? 'AUTENTICANDO...' : 'ENTRAR NO CLIPPER ↗'}
               </button>
             </form>
+
+            {/* Quick Demo Access */}
+            <div className="p-3.5 bg-surface-container-low border-[1.5px] border-on-surface space-y-2.5">
+              <div className="font-mono text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                // ACESSO RÁPIDO DEMO (FLUXO MOCKADO)
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => handleDemoLogin('Customer')}
+                  className="py-2 px-3 bg-white hover:bg-on-surface hover:text-white text-on-surface border-[1.5px] border-on-surface font-bold uppercase transition-colors cursor-pointer"
+                >
+                  DEMO CLIENTE (/meus-agendamentos)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDemoLogin('BarberShopOwner')}
+                  className="py-2 px-3 bg-on-surface hover:bg-primary text-white border-[1.5px] border-on-surface font-bold uppercase transition-colors cursor-pointer"
+                >
+                  DEMO DONO B2B (/b2b)
+                </button>
+              </div>
+            </div>
 
             <div className="pt-4 border-t-[1.5px] border-on-surface/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-mono text-xs">
               <span className="text-on-surface-variant">Ainda não tem conta?</span>

@@ -12,8 +12,8 @@ export function InternalNavbar({ activeTab = 'barbearias' }: InternalNavbarProps
   const navItems: { id: InternalNavbarProps['activeTab']; label: string; to: string }[] = [
     { id: 'radar', label: 'RADAR AO VIVO', to: '/radar' },
     { id: 'barbearias', label: 'BARBEARIAS', to: '/barbearia/grid-lab-01' },
-    { id: 'agendamentos', label: 'MEUS AGENDAMENTOS', to: '/dashboard' },
-    { id: 'favoritos', label: 'FAVORITOS', to: '/#barbearias' },
+    { id: 'agendamentos', label: 'MEUS AGENDAMENTOS', to: '/meus-agendamentos' },
+    { id: 'favoritos', label: 'PAINEL B2B', to: '/b2b' },
   ];
 
   return (

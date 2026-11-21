@@ -61,8 +61,8 @@ export function Navbar() {
             </a>
           </div>
           <Link
-            to={isAuthenticated ? '/dashboard' : '/login'}
-            title={isAuthenticated && user ? `${user.fullName} (Ir para Dashboard)` : 'Entrar no Clipper'}
+            to={isAuthenticated ? '/meus-agendamentos' : '/login'}
+            title={isAuthenticated && user ? `${user.fullName} (Meus Agendamentos)` : 'Entrar no Clipper'}
             className="flex items-center justify-center h-full px-4 border-l-[1.5px] border-outline bg-surface hover:bg-surface-variant transition-colors"
           >
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">

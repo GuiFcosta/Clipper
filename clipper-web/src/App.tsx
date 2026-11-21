@@ -1,29 +1,54 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { B2BDashboardPage } from './pages/B2BDashboardPage';
 import { BarbershopDetailPage } from './pages/BarbershopDetailPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
+import { MyAppointmentsPage } from './pages/MyAppointmentsPage';
 import { RadarPage } from './pages/RadarPage';
 import { RegisterPage } from './pages/RegisterPage';
 
-function DashboardPage() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
 
-  if (isLoading) return <p style={{ padding: '2rem' }}>Carregando...</p>;
-  if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-surface-variant flex items-center justify-center font-mono text-xs font-bold uppercase">
+        VERIFICANDO SESSÃO CLIPPER...
+      </div>
+    );
+  }
 
-  return (
-    <main style={{ maxWidth: 720, margin: '3rem auto', padding: '0 1rem', fontFamily: 'system-ui, sans-serif' }}>
-      <h1>Dashboard</h1>
-      <pre style={{ background: '#111827', color: '#f9fafb', padding: '1rem', borderRadius: 8, overflowX: 'auto' }}>
-        {JSON.stringify(user, null, 2)}
-      </pre>
-      <button type="button" onClick={() => void logout()}>
-        Sair
-      </button>
-    </main>
-  );
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function DashboardRedirect() {
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-surface-variant flex items-center justify-center font-mono text-xs font-bold uppercase">
+        CARREGANDO...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role === 'BarberShopOwner') {
+    return <Navigate to="/b2b" replace />;
+  }
+
+  return <Navigate to="/meus-agendamentos" replace />;
 }
 
 export default function App() {
@@ -35,7 +60,23 @@ export default function App() {
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route
+        path="/meus-agendamentos"
+        element={
+          <RequireAuth>
+            <MyAppointmentsPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/b2b"
+        element={
+          <RequireAuth>
+            <B2BDashboardPage />
+          </RequireAuth>
+        }
+      />
+      <Route path="/dashboard" element={<DashboardRedirect />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
